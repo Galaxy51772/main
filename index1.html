@@ -1,0 +1,1485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gelmix siteOS</title>
+<meta name="description" content="A retro terminal-styled personal homepage — draggable, resizable windows, an animated void backdrop, and a playable chess game.">
+<meta property="og:title" content="VOID//TERM">
+<meta property="og:description" content="Multi-creative person doing multi-creative things. Personal terminal homepage.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b0912">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0912'/%3E%3Cpolygon points='16,6 26,16 16,26 6,16' fill='%23a276ff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0912;
+    --panel:#17111f;
+    --panel-alt:#1f1830;
+    --chrome:#463a6b;
+    --ink:#e9e2f7;
+    --ink-dim:#9c8fc2;
+    --glow:#a276ff;
+    --signal:#4dffb0;
+    --alert:#ff5f9e;
+    --shadow:#05030a;
+    --font-display:'VT323', monospace;
+    --font-body:'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+    --radius:3px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--void);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 2 4.5 18.5 9 14l3.5 7 3-1.5-3.5-7H19L4 2Z' fill='%230b0912' stroke='%23463a6b' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") 2 2, auto;
+  }
+  a{ color:var(--glow); }
+  button{ font-family:inherit; }
+  button, a{ touch-action:manipulation; }
+  :focus-visible{ outline:2px solid var(--signal); outline-offset:2px; }
+  ul{ margin:0; padding:0; }
+
+  .bg-canvas{ position:fixed; inset:0; z-index:0; display:block; pointer-events:none; }
+
+  .boot{
+    position:fixed; inset:0; z-index:9999;
+    background:var(--void);
+    color:var(--signal);
+    padding:10vh 6vw;
+    display:flex; flex-direction:column;
+    transition:opacity .5s ease, visibility .5s ease;
+    animation:boot-autohide 0s 14s forwards;
+  }
+  @keyframes boot-autohide{ to{ opacity:0; visibility:hidden; pointer-events:none; } }
+  .boot--done{ opacity:0 !important; visibility:hidden !important; pointer-events:none !important; }
+  #bootLines{ display:flex; flex-direction:column; gap:4px; }
+  .boot__line{ white-space:pre-wrap; word-break:break-word; }
+  .boot-cursor{ display:inline-block; animation:blink 1s step-end infinite; }
+  .boot-skip{ margin-top:auto; color:var(--ink-dim); font-size:.8em; letter-spacing:.05em; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .crt-overlay{
+    position:fixed; inset:0; z-index:9000; pointer-events:none;
+    background:
+      repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,.16) 2px, rgba(0,0,0,0) 3px),
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.5) 100%);
+    mix-blend-mode:multiply;
+    opacity:.9;
+    transition:opacity .08s linear;
+  }
+  .crt-overlay.flicker{ opacity:.5; }
+
+  .desktop{ position:relative; z-index:1; min-height:850px; padding-bottom:80px; padding-top:20px; }
+
+  .window{
+    position:absolute;
+    left:var(--x,24px); top:var(--y,96px);
+    width:clamp(320px, 30vw, 480px);
+    min-width:240px; min-height:180px;
+    background:var(--panel);
+    border:1px solid var(--chrome);
+    border-radius:var(--radius);
+    box-shadow:0 12px 32px -14px rgba(0,0,0,.65);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    opacity:1;
+    transform:scale(1) translateY(0);
+    transition:opacity .2s ease, transform .25s cubic-bezier(.2,.8,.2,1), left .25s cubic-bezier(.2,.8,.2,1), top .25s cubic-bezier(.2,.8,.2,1), width .25s cubic-bezier(.2,.8,.2,1), height .25s cubic-bezier(.2,.8,.2,1), border-radius .25s ease, box-shadow .25s ease;
+  }
+  .window--anim-out{ opacity:0; transform:scale(.92) translateY(0); pointer-events:none; }
+  .window--anim-minimize{ opacity:0; transform:translate(var(--minimize-x, 0px), var(--minimize-y, 70px)) scale(.22); transform-origin:center center; pointer-events:none; }
+  .window--anim-restore{ animation:window-restore .32s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes window-restore{
+    from{ opacity:0; transform:translate(var(--restore-x, 0px), var(--restore-y, 70px)) scale(.22); }
+    to{ opacity:1; transform:translate(0,0) scale(1); }
+  }
+  .window--anim-maximize{ opacity:.86; transform:scale(.96); box-shadow:0 0 0 1px var(--glow), 0 0 28px rgba(162,118,255,.3); }
+  .window--wide{ width:clamp(380px, 34vw, 560px); }
+  .window--anchor-right{ left:auto; right:28px; }
+  .window--closed{ display:none; }
+  .window--selected{ outline:2px solid rgba(162,118,255,.95); outline-offset:2px; }
+  .window.is-dragging, .window.is-resizing{ box-shadow:0 20px 44px -10px rgba(0,0,0,.7), 0 0 0 2px var(--glow); }
+  .window--minimized{ display:none; }
+
+  .window--maximized{
+    position:fixed !important;
+    left:0 !important; top:0 !important; right:0 !important; bottom:52px !important;
+    width:auto !important; height:auto !important;
+    border-radius:0;
+    z-index:400 !important;
+  }
+  .window--maximized .win-resize{ display:none; }
+  .desktop-selection{ position:fixed; z-index:450; display:none; pointer-events:none; background:rgba(162,118,255,.24); border:1px solid rgba(194,161,255,.95); box-shadow:inset 0 0 0 1px rgba(109,74,184,.32); }
+  .desktop-selection.is-active{ display:block; }
+
+  .window__bar{
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel-alt);
+    border-bottom:1px solid var(--chrome);
+    padding:7px 10px;
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7.5 11V6a1.5 1.5 0 0 1 3 0v4-6a1.5 1.5 0 0 1 3 0v6-5a1.5 1.5 0 0 1 3 0v6-3a1.5 1.5 0 0 1 3 0v6.5A6.5 6.5 0 0 1 16 20h-2.2a5 5 0 0 1-4.3-2.4L6 13.5a1.5 1.5 0 0 1 2.6-1.5L10 14V11' fill='%230b0912' stroke='%23463a6b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 8 8, grab;
+    user-select:none;
+    touch-action:none;
+    flex:none;
+  }
+  .window.is-dragging .window__bar{ cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 9.5 8.5 7l2 2 1.5-1.5 2 2L16 8.5l2 2-1 1 1.5 1.5a3 3 0 0 1 0 4.2l-1.2 1.2a5.5 5.5 0 0 1-7.8 0l-3.2-3.2a1.6 1.6 0 0 1 2.2-2.3L6 12' fill='%230b0912' stroke='%23463a6b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 8 8, grabbing; }
+  .window__icon{ color:var(--glow); width:1.1em; text-align:center; }
+  .window__title{ font-family:var(--font-display); font-size:1.25rem; letter-spacing:.03em; }
+  .window__path{ margin-left:auto; font-size:.65rem; letter-spacing:.08em; color:var(--ink-dim); text-transform:uppercase; white-space:nowrap; }
+  .window__controls{ display:flex; gap:4px; margin-left:8px; }
+  .win-btn{ width:20px; height:20px; display:grid; place-items:center; background:transparent; border:1px solid var(--chrome); color:var(--ink-dim); border-radius:2px; cursor:pointer; line-height:1; padding:0; font-size:.85rem; box-shadow:2px 2px 0 0 var(--shadow); transition:transform .06s ease, box-shadow .06s ease; }
+  .win-btn:hover{ color:var(--alert); border-color:var(--alert); }
+  .win-btn:active{ transform:translate(2px,2px); box-shadow:none; }
+
+  .window__body{ padding:16px; display:flex; flex-direction:column; gap:10px; flex:1 1 auto; overflow:auto; min-height:0; }
+  .window__status{ padding:5px 22px 5px 10px; border-top:1px solid var(--chrome); background:var(--panel-alt); font-size:.65rem; letter-spacing:.06em; color:var(--ink-dim); text-transform:uppercase; flex:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .win-resize{ position:absolute; right:0; bottom:0; width:18px; height:18px; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5 19 19 5M11 19h8V11M5 13v6h6' fill='none' stroke='%23463a6b' stroke-width='4' stroke-linecap='square'/%3E%3Cpath d='M5 19 19 5M11 19h8V11M5 13v6h6' fill='none' stroke='%230b0912' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") 12 12, nwse-resize; touch-action:none; }
+  .win-resize::before{ content:''; position:absolute; right:3px; bottom:3px; width:8px; height:8px; border-right:2px solid var(--chrome); border-bottom:2px solid var(--chrome); }
+  .window:hover .win-resize::before, .window.is-resizing .win-resize::before{ border-color:var(--glow); }
+
+  .avatar{ width:56px; height:56px; display:grid; place-items:center; border:1px solid var(--chrome); border-radius:2px; font-size:1.5rem; color:var(--glow); background:linear-gradient(135deg, rgba(162,118,255,.14), transparent); flex:none; }
+  .prompt{ margin:0; color:var(--ink-dim); font-size:.78rem; }
+  .prompt::before{ content:'❯ '; color:var(--signal); }
+  .name{ margin:0; font-family:var(--font-display); font-size:2.3rem; line-height:1; letter-spacing:.01em; }
+  .tagline{ margin:0; color:var(--ink-dim); font-size:.85rem; }
+  .status-line{ margin:2px 0 0; display:flex; align-items:center; gap:7px; font-size:.7rem; letter-spacing:.06em; color:var(--signal); text-transform:uppercase; }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--signal); box-shadow:0 0 8px var(--signal); flex:none; }
+
+  .section-label{ font-size:.65rem; letter-spacing:.08em; color:var(--ink-dim); text-transform:uppercase; border-top:1px solid var(--chrome); padding-top:10px; margin-top:2px; }
+  .links{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .links li a{ display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--panel-alt); border:1px solid var(--chrome); border-radius:2px; color:var(--ink); text-decoration:none; font-size:.85rem; box-shadow:2px 2px 0 0 var(--shadow); transition:transform .06s ease, box-shadow .06s ease; }
+  .links li a:active{ transform:translate(2px,2px); box-shadow:none; }
+  .links li a::before{ content:'›'; color:var(--glow); }
+  .links li a:hover{ color:var(--glow); border-color:var(--glow); }
+  .links li a small{ margin-left:auto; color:var(--ink-dim); font-size:.65rem; letter-spacing:.04em; text-transform:uppercase; }
+
+  .log{ font-size:.78rem; color:var(--signal); display:flex; flex-direction:column; gap:3px; }
+
+  .chess{ display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; }
+  .chess__hud{ display:flex; justify-content:space-between; align-items:center; align-self:stretch; font-size:.7rem; letter-spacing:.06em; color:var(--ink-dim); text-transform:uppercase; }
+  .chess__bot{ align-self:stretch; color:var(--ink-dim); font-size:.68rem; letter-spacing:.06em; text-align:center; text-transform:uppercase; }
+  .chess__hud strong{ font-family:var(--font-display); font-size:1.1rem; color:var(--signal); letter-spacing:.02em; }
+  .chess-board-wrap{ container-type:inline-size; width:100%; max-width:440px; }
+  .chess-board{ display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); aspect-ratio:1; border:1px solid var(--chrome); }
+  .chess-sq{ position:relative; display:flex; align-items:center; justify-content:center; border:none; padding:0; margin:0; cursor:pointer; font-size:9cqw; line-height:1; }
+  .chess-sq--light{ background:#241c38; }
+  .chess-sq--dark{ background:#160f22; }
+  .chess-piece{ display:grid; place-items:center; width:100%; height:100%; position:relative; z-index:1; }
+  .chess-piece--moving{ animation:chess-piece-move .28s cubic-bezier(.2,.8,.2,1); }
+  @keyframes chess-piece-move{
+    from{ transform:translate(calc(var(--move-x) * 100%), calc(var(--move-y) * 100%)); opacity:.35; }
+    to{ transform:translate(0,0); opacity:1; }
+  }
+  .chess-sq--whitePiece{ color:#f3efff; text-shadow:0 0 4px rgba(255,255,255,.35); }
+  .chess-sq--blackPiece{ color:#0a0710; text-shadow:0 0 3px rgba(162,118,255,.5); }
+  .chess-sq--selected{ box-shadow:inset 0 0 0 2px var(--glow); }
+  .chess-sq--legal::after{ content:''; width:.32em; height:.32em; border-radius:50%; background:var(--signal); opacity:.6; }
+  .chess-sq--capture{ box-shadow:inset 0 0 0 2px var(--alert); }
+  .chess-sq--check{ background:rgba(255,95,158,.35) !important; }
+  .chess__captured{ display:flex; flex-direction:column; gap:4px; align-self:stretch; }
+  .chess__capturedRow{ display:flex; align-items:center; gap:6px; font-size:.95rem; min-height:1.3em; }
+  .chess__capturedRow small{ font-size:.6rem; color:var(--ink-dim); letter-spacing:.05em; width:6em; flex:none; text-transform:uppercase; }
+  .game__msg{ min-height:1.2em; font-size:.72rem; color:var(--ink-dim); letter-spacing:.04em; text-align:center; }
+  .game__controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .win-action{ font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; background:transparent; border:1px solid var(--glow); color:var(--glow); border-radius:2px; cursor:pointer; box-shadow:3px 3px 0 0 var(--shadow); transition:transform .06s ease, box-shadow .06s ease; }
+  .win-action:active{ transform:translate(3px,3px); box-shadow:none; }
+  .win-action:disabled{ opacity:.35; cursor:default; border-color:var(--chrome); color:var(--ink-dim); box-shadow:none; transform:none; }
+
+  .taskbar{ position:fixed; left:0; right:0; bottom:0; z-index:500; display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--panel-alt); border-top:1px solid var(--chrome); }
+  .taskbar__brand{ font-family:var(--font-display); font-size:1.15rem; color:var(--glow); letter-spacing:.04em; white-space:nowrap; }
+  .taskbar__windows{ display:flex; gap:6px; overflow-x:auto; flex:1; scrollbar-width:none; }
+  .taskbar__windows::-webkit-scrollbar{ display:none; }
+  .taskbar__btn{ font-family:var(--font-body); font-size:.65rem; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; padding:5px 9px; background:transparent; border:1px solid var(--chrome); color:var(--ink-dim); border-radius:2px; cursor:pointer; box-shadow:2px 2px 0 0 var(--shadow); transition:transform .06s ease, box-shadow .06s ease; }
+  .taskbar__btn:active{ transform:translate(2px,2px); box-shadow:none; }
+  .taskbar__btn.is-open{ color:var(--signal); border-color:var(--signal); }
+  .taskbar__right{ display:flex; align-items:center; gap:10px; }
+  .taskbar__clock{ font-size:.72rem; color:var(--ink-dim); min-width:3.2em; text-align:right; }
+
+  .bot-menu{ position:fixed; inset:0; z-index:9500; display:grid; place-items:center; padding:24px; background:rgba(11,9,18,.86); }
+  .bot-menu[hidden]{ display:none; }
+  .bot-menu__panel{ width:min(560px,100%); background:var(--panel); border:1px solid var(--glow); box-shadow:0 18px 48px rgba(0,0,0,.7), 0 0 0 1px var(--chrome); }
+  .bot-menu__bar{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--panel-alt); border-bottom:1px solid var(--chrome); }
+  .bot-menu__title{ font-family:var(--font-display); font-size:1.5rem; color:var(--glow); letter-spacing:.04em; }
+  .bot-menu__close{ margin-left:auto; }
+  .bot-menu__body{ padding:18px; }
+  .bot-menu__prompt{ margin:0 0 14px; color:var(--ink-dim); font-size:.78rem; }
+  .bot-menu__options{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .bot-menu__option{ min-height:76px; padding:12px; text-align:left; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink); cursor:pointer; box-shadow:3px 3px 0 var(--shadow); transition:transform .06s ease, border-color .12s ease, color .12s ease; }
+  .bot-menu__option:hover, .bot-menu__option[aria-pressed="true"]{ border-color:var(--signal); color:var(--signal); }
+  .bot-menu__option:active{ transform:translate(3px,3px); box-shadow:none; }
+  .bot-menu__name{ display:block; font-family:var(--font-display); font-size:1.35rem; }
+  .bot-menu__detail{ display:block; margin-top:4px; color:var(--ink-dim); font-size:.68rem; line-height:1.35; }
+  .bot-menu__option:hover .bot-menu__detail, .bot-menu__option[aria-pressed="true"] .bot-menu__detail{ color:var(--ink); }
+
+  @media (max-width:920px){
+    .window{ position:static !important; left:auto !important; top:auto !important; width:100% !important; height:auto !important; margin:0 0 16px; }
+    .window__path{ display:none; }
+    .win-resize{ display:none !important; }
+    [data-action="maximize"]{ display:none !important; }
+    .desktop{ min-height:0; padding:12px 12px 88px; }
+    .bot-menu{ padding:12px; }
+    .bot-menu__options{ grid-template-columns:1fr; }
+  }
+  @media (min-width:921px){
+    .desktop{ padding-left:12px; }
+  }
+
+  a, .win-btn, .chess-sq, .win-action, .taskbar__btn, .bot-menu__option, .bot-menu__close{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M8 11V5.5a1.5 1.5 0 0 1 3 0V10 4.5a1.5 1.5 0 0 1 3 0V10 6a1.5 1.5 0 0 1 3 0v7.5l1.1-1.3a1.6 1.6 0 0 1 2.4 2.1l-3.7 4.2A4.5 4.5 0 0 1 13.4 20H11a5 5 0 0 1-4.4-2.6L4.8 14a1.7 1.7 0 0 1 2.9-1.7L8 13.5V11Z' fill='%230b0912' stroke='%23463a6b' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") 8 2, pointer;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .crt-overlay{ transition:none; }
+    .boot{ animation:none; }
+    .window{ transition:none; }
+    .window--anim-restore{ animation:none; }
+    .chess-piece--moving{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="bg-canvas" id="bgCanvas" aria-hidden="true"></canvas>
+
+<div class="boot" id="boot">
+  <div id="bootLines"></div>
+  <div class="boot-skip">press any key or tap to skip</div>
+</div>
+
+<div class="crt-overlay" aria-hidden="true"></div>
+
+<div class="bot-menu" id="botMenu" role="dialog" aria-modal="true" aria-labelledby="botMenuTitle" hidden>
+  <div class="bot-menu__panel">
+    <div class="bot-menu__bar">
+      <span class="window__icon">♞</span>
+      <span class="bot-menu__title" id="botMenuTitle">SELECT MODE</span>
+      <button class="win-btn bot-menu__close" id="botMenuClose" type="button" aria-label="Close bot menu">×</button>
+    </div>
+    <div class="bot-menu__body">
+      <p class="bot-menu__prompt">CHESS.EXE / SELECT OPPONENT OR 1V1 MODE</p>
+      <div class="bot-menu__options">
+        <button class="bot-menu__option" type="button" data-bot="1v1" aria-pressed="false"><span class="bot-menu__name">1V1</span><span class="bot-menu__detail">Two players, one computer.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="easy" aria-pressed="false"><span class="bot-menu__name">EASY</span><span class="bot-menu__detail">Random moves.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="hard" aria-pressed="false"><span class="bot-menu__name">HARD</span><span class="bot-menu__detail">Basic tactical search.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="zach" aria-pressed="false"><span class="bot-menu__name">ZACH</span><span class="bot-menu__detail">Try loosing with it.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="extreme" aria-pressed="false"><span class="bot-menu__name">EXTREME</span><span class="bot-menu__detail">Deepest available search (depth: 6). Can sometimes crash your browser.</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bot-menu" id="promotionMenu" role="dialog" aria-modal="true" aria-labelledby="promotionMenuTitle" hidden>
+  <div class="bot-menu__panel">
+    <div class="bot-menu__bar">
+      <span class="window__icon">♟</span>
+      <span class="bot-menu__title" id="promotionMenuTitle">PROMOTE PAWN</span>
+      <button class="win-btn bot-menu__close" id="promotionMenuClose" type="button" aria-label="Cancel promotion">×</button>
+    </div>
+    <div class="bot-menu__body">
+      <p class="bot-menu__prompt">CHESS.EXE / SELECT PROMOTION PIECE</p>
+      <div class="bot-menu__options">
+        <button class="bot-menu__option" type="button" data-promotion="Q"><span class="bot-menu__name">QUEEN</span><span class="bot-menu__detail">Maximum power.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="R"><span class="bot-menu__name">ROOK</span><span class="bot-menu__detail">Straight-line attack.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="B"><span class="bot-menu__name">BISHOP</span><span class="bot-menu__detail">Diagonal attack.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="N"><span class="bot-menu__name">KNIGHT</span><span class="bot-menu__detail">Jumping attack.</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="desktop" id="desktop">
+  <div class="desktop-selection" id="desktopSelection" aria-hidden="true"></div>
+
+  <section class="window" data-window="identity" style="--x:28px; --y:24px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">◆</span>
+      <span class="window__title">IDENTITY.EXE</span>
+      <span class="window__path">USER PROFILE</span>
+      <div class="window__controls">
+        <button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" aria-label="Close window">×</button>
+      </div>
+    </header>
+    <div class="window__body">
+      <div class="avatar" aria-hidden="true">◈</div>
+      <p class="prompt">Gelmix@root: sudo whois</p>
+      <h1 class="name">Gelmix</h1>
+      <p class="tagline">I like to play some games, such as minecraft and chess!</p>
+      <p class="status-line"><span class="dot"></span>STATUS: ONLINE</p>
+      <div class="section-label">Links</div>
+      <ul class="links">
+        <li><a href="https://github.com/galaxy51772" target="_blank" rel="noopener">GITHUB<small>code</small></a></li>
+        <li><a href="https://modrinth.com/user/gelmix" target="_blank" rel="noopener">Modrinth<small>My MC projects</small></a></li>
+        <li><a href="https://youtube.com/@gelmixg" target="_blank" rel="noopener">Youtube<small>Main channel</small></a></li>
+        <li><a href="https://youtube.com/@cutebuff" target="_blank" rel="noopener">Youtube 2<small>Cute Buff channel</small></a></li>
+      </ul>
+    </div>
+    <footer class="window__status">READY · 4 LINKS</footer>
+    <div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+  <section class="window window--wide" data-window="chess" style="--x:72px; --y:64px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">♞</span>
+      <span class="window__title">CHESS.EXE</span>
+      <span class="window__path">PROGRAMS / GAMES</span>
+      <div class="window__controls">
+        <button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" aria-label="Close window">×</button>
+      </div>
+    </header>
+    <div class="window__body">
+      <div class="chess">
+        <div class="chess__hud">
+          <span id="chessTurn">WHITE TO MOVE</span>
+          <button class="win-action" id="chessDifficulty" type="button" aria-haspopup="dialog" aria-expanded="false">MENU</button>
+        </div>
+        <div class="chess__bot" id="chessBot">MODE: HARD</div>
+        <div class="chess-board-wrap">
+          <div class="chess-board" id="chessBoard" role="group" aria-label="Chess board. Click a piece, then a highlighted square to move it."></div>
+        </div>
+        <div class="chess__captured">
+          <div class="chess__capturedRow"><small>White took</small><span id="capturedByWhite"></span></div>
+          <div class="chess__capturedRow"><small>Black took</small><span id="capturedByBlack"></span></div>
+        </div>
+        <div class="game__msg" id="chessMsg" aria-live="polite">YOUR MOVE — WHITE</div>
+        <div class="game__controls">
+          <button class="win-action" id="chessNewBtn" type="button">NEW GAME</button>
+          <button class="win-action" id="chessUndoBtn" type="button">UNDO</button>
+        </div>
+      </div>
+    </div>
+    <footer class="window__status">CLICK A PIECE, THEN A SQUARE</footer>
+    <div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+  <section class="window window--anchor-right" data-window="log" style="--y:340px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">&gt;_</span>
+      <span class="window__title">TERMINAL.LOG</span>
+      <span class="window__path">SYSTEM</span>
+      <div class="window__controls">
+        <button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" aria-label="Close window">×</button>
+      </div>
+    </header>
+    <div class="window__body">
+      <div class="log" id="logLines"></div>
+    </div>
+    <footer class="window__status">LIVE · READ ONLY</footer>
+    <div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+</main>
+
+<div class="taskbar">
+  <div class="taskbar__brand">Gelmix siteOS</div>
+  <div class="taskbar__windows">
+    <button class="taskbar__btn is-open" data-window="identity">Identity</button>
+    <button class="taskbar__btn is-open" data-window="chess">Chess</button>
+    <button class="taskbar__btn is-open" data-window="log">Log</button>
+  </div>
+  <div class="taskbar__right">
+    <span id="clock" class="taskbar__clock">--:--</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var canvas = document.getElementById('bgCanvas');
+  var ctx = canvas.getContext('2d');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var W, H, particles = [];
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeParticles(){
+    var palette = [cssVar('--glow'), cssVar('--signal'), cssVar('--ink-dim')];
+    var count = Math.min(110, Math.max(20, Math.floor((W*H)/14000)));
+    particles = [];
+    for(var i=0;i<count;i++){
+      particles.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: Math.random()*1.6 + 0.6,
+        speed: Math.random()*0.12 + 0.03,
+        drift: (Math.random()-0.5)*0.06,
+        phase: Math.random()*Math.PI*2,
+        color: palette[i % palette.length]
+      });
+    }
+  }
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      if(!reduced){
+        p.y -= p.speed;
+        p.x += p.drift;
+        if(p.y < -4){ p.y = H+4; p.x = Math.random()*W; }
+        if(p.x < -4) p.x = W+4;
+        if(p.x > W+4) p.x = -4;
+      }
+      var twinkle = reduced ? 0.5 : 0.35 + 0.35*Math.sin(t*0.001 + p.phase);
+      ctx.globalAlpha = Math.max(0.08, twinkle);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if(!reduced) requestAnimationFrame(draw);
+  }
+
+  resize();
+  makeParticles();
+  window.addEventListener('resize', function(){ resize(); makeParticles(); });
+  draw(0);
+})();
+
+(function(){
+  var bootEl = document.getElementById('boot');
+  var linesEl = document.getElementById('bootLines');
+  var lines = [
+    'Gelmix siteOS',
+    'loading terminal.log ....... OK',
+    'checking display driver ....... OK',
+    'loading identity.exe ....... OK',
+    'loading chess.exe ....... OK',
+    'Saving logs to home/logs/latest.log ....... Done',
+    'Welcome back!'
+  ];
+  var skip = false;
+  var LINE_PAUSE_MS = 90;
+  var HOLD_LAST_LINE_MS = 1000;
+  var cursor = document.createElement('span');
+  cursor.className = 'boot-cursor';
+  cursor.textContent = '▌';
+  linesEl.appendChild(cursor);
+
+  function typeText(el, text, done){
+    var i = 0;
+    var iv = setInterval(function(){
+      if(skip){ clearInterval(iv); el.textContent = text; done(); return; }
+      i++;
+      el.textContent = text.slice(0, i);
+      if(i >= text.length){ clearInterval(iv); done(); }
+    }, 14);
+  }
+
+  function nextLine(li){
+    if(skip || li >= lines.length){ cursor.remove(); finish(); return; }
+    var p = document.createElement('div');
+    p.className = 'boot__line';
+    linesEl.insertBefore(p, cursor);
+    var isLast = (li === lines.length - 1);
+    typeText(p, lines[li], function(){
+      setTimeout(function(){ nextLine(li+1); }, isLast ? HOLD_LAST_LINE_MS : LINE_PAUSE_MS);
+    });
+  }
+
+  function finish(){
+    bootEl.classList.add('boot--done');
+    setTimeout(function(){ bootEl.remove(); }, 550);
+    window.removeEventListener('keydown', onSkip);
+    bootEl.removeEventListener('pointerdown', onSkip);
+  }
+
+  function onSkip(){ if(!skip){ skip = true; finish(); } }
+
+  window.addEventListener('keydown', onSkip);
+  bootEl.addEventListener('pointerdown', onSkip);
+
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    skip = true; finish();
+  } else {
+    nextLine(0);
+    var totalChars = lines.reduce(function(sum, l){ return sum + l.length; }, 0);
+    var estimatedMs = totalChars*14 + lines.length*LINE_PAUSE_MS + HOLD_LAST_LINE_MS;
+    setTimeout(function(){ if(!skip) finish(); }, estimatedMs + 2500);
+  }
+})();
+
+(function(){
+  var overlay = document.querySelector('.crt-overlay');
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function schedule(){
+    var delay = 6000 + Math.random()*9000;
+    setTimeout(function(){
+      overlay.classList.add('flicker');
+      setTimeout(function(){ overlay.classList.remove('flicker'); }, 140);
+      schedule();
+    }, delay);
+  }
+  schedule();
+})();
+
+(function(){
+  var el = document.getElementById('logLines');
+  var lines = [
+    '> Loading home/logs/latest.log',
+    '> Succesfully loaded! Displaying...',
+    '> Gelmix siteOS',
+    '> loading terminal.log ....... OK',
+    '> checking display driver ....... OK',
+    '> loading identity.exe ....... OK',
+    '> loading chess.exe ....... OK',
+    '> Saving logs to home/logs/latest.log ....... Done',
+    '> Welcome back!',
+    '> Logs Displayed!',
+    '> Checking for notifications...',
+    '> No new notifications, as expected.',
+    '> _'
+  ];
+  var li = 0;
+  function addLine(){
+    if(li >= lines.length) return;
+    var p = document.createElement('div');
+    p.textContent = lines[li];
+    el.appendChild(p);
+    el.scrollTop = el.scrollHeight;
+    li++;
+    setTimeout(addLine, 550 + Math.random()*400);
+  }
+  setTimeout(addLine, 200);
+})();
+
+(function(){
+  var clockEl = document.getElementById('clock');
+  function tick(){
+    var d = new Date();
+    var h = String(d.getHours()).padStart(2,'0');
+    var m = String(d.getMinutes()).padStart(2,'0');
+    clockEl.textContent = h+':'+m;
+  }
+  tick();
+  setInterval(tick, 1000*15);
+})();
+
+(function(){
+  var windows = Array.prototype.slice.call(document.querySelectorAll('.window'));
+  var zTop = 10;
+  var ANIM_MS = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 200;
+
+  function isDesktopMode(){
+    return window.matchMedia('(min-width: 921px)').matches;
+  }
+
+  var selectionBox = document.getElementById('desktopSelection');
+  var selecting = false, selectionMoved = false, selectionStartX = 0, selectionStartY = 0;
+
+  function clearWindowSelection(){
+    windows.forEach(function(win){ win.classList.remove('window--selected'); });
+  }
+
+  function updateSelection(e){
+    var left = Math.min(selectionStartX, e.clientX);
+    var top = Math.min(selectionStartY, e.clientY);
+    var width = Math.abs(e.clientX - selectionStartX);
+    var height = Math.abs(e.clientY - selectionStartY);
+    selectionBox.style.left = left+'px';
+    selectionBox.style.top = top+'px';
+    selectionBox.style.width = width+'px';
+    selectionBox.style.height = height+'px';
+    windows.forEach(function(win){
+      var rect = win.getBoundingClientRect();
+      var intersects = left < rect.right && left+width > rect.left && top < rect.bottom && top+height > rect.top;
+      win.classList.toggle('window--selected', intersects);
+    });
+  }
+
+  desktop.addEventListener('pointerdown', function(e){
+    if(!isDesktopMode() || e.target!==desktop) return;
+    selecting = true;
+    selectionMoved = false;
+    selectionStartX = e.clientX;
+    selectionStartY = e.clientY;
+    clearWindowSelection();
+    try{ desktop.setPointerCapture(e.pointerId); }catch(_){ }
+  });
+  desktop.addEventListener('pointermove', function(e){
+    if(!selecting) return;
+    if(Math.abs(e.clientX-selectionStartX)>3 || Math.abs(e.clientY-selectionStartY)>3){
+      selectionMoved = true;
+      selectionBox.classList.add('is-active');
+      updateSelection(e);
+    }
+  });
+  function endSelection(e){
+    if(!selecting) return;
+    selecting = false;
+    selectionBox.classList.remove('is-active');
+    try{ desktop.releasePointerCapture(e.pointerId); }catch(_){ }
+  }
+  desktop.addEventListener('pointerup', endSelection);
+  desktop.addEventListener('pointercancel', endSelection);
+
+  function bringToFront(win){
+    zTop++;
+    win.style.zIndex = zTop;
+  }
+
+  function animateHide(win, exitClass, restClass){
+    win.classList.add(exitClass);
+    setTimeout(function(){
+      win.classList.add(restClass);
+      win.classList.remove(exitClass);
+      win.style.removeProperty('--minimize-x');
+      win.style.removeProperty('--minimize-y');
+    }, ANIM_MS);
+  }
+
+  function animateMinimize(win){
+    var taskbarBtn = document.querySelector('.taskbar__btn[data-window="'+win.dataset.window+'"]');
+    if(!taskbarBtn){
+      animateHide(win, 'window--anim-minimize', 'window--minimized');
+      return;
+    }
+
+    var winRect = win.getBoundingClientRect();
+    var btnRect = taskbarBtn.getBoundingClientRect();
+    var winCenterX = winRect.left + winRect.width / 2;
+    var winCenterY = winRect.top + winRect.height / 2;
+    var btnCenterX = btnRect.left + btnRect.width / 2;
+    var btnCenterY = btnRect.top + btnRect.height / 2;
+    win.style.setProperty('--minimize-x', (btnCenterX - winCenterX) + 'px');
+    win.style.setProperty('--minimize-y', (btnCenterY - winCenterY) + 'px');
+    animateHide(win, 'window--anim-minimize', 'window--minimized');
+  }
+
+  function animateShow(win){
+    var taskbarBtn = document.querySelector('.taskbar__btn[data-window="'+win.dataset.window+'"]');
+    win.classList.remove('window--closed');
+    win.classList.remove('window--minimized');
+    win.classList.add('window--anim-out');
+    void win.offsetHeight;
+    win.classList.remove('window--anim-out');
+    if(taskbarBtn){
+      var winRect = win.getBoundingClientRect();
+      var btnRect = taskbarBtn.getBoundingClientRect();
+      win.style.setProperty('--restore-x', (btnRect.left + btnRect.width / 2 - (winRect.left + winRect.width / 2)) + 'px');
+      win.style.setProperty('--restore-y', (btnRect.top + btnRect.height / 2 - (winRect.top + winRect.height / 2)) + 'px');
+    }
+    win.classList.add('window--anim-restore');
+    setTimeout(function(){
+      win.classList.remove('window--anim-restore');
+      win.style.removeProperty('--restore-x');
+      win.style.removeProperty('--restore-y');
+    }, ANIM_MS ? 320 : 0);
+  }
+
+  function setTaskbarState(id, open){
+    var btn = document.querySelector('.taskbar__btn[data-window="'+id+'"]');
+    if(btn) btn.classList.toggle('is-open', open);
+  }
+
+  window.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    var maxed = document.querySelector('.window--maximized');
+    if(maxed){
+      maxed.classList.remove('window--maximized');
+      var mb = maxed.querySelector('[data-action="maximize"]');
+      if(mb) mb.setAttribute('aria-label', 'Maximize window');
+    }
+  });
+
+  windows.forEach(function(win){
+    var bar = win.querySelector('.window__bar');
+    var closeBtn = win.querySelector('[data-action="close"]');
+    var minBtn = win.querySelector('[data-action="minimize"]');
+    var maxBtn = win.querySelector('[data-action="maximize"]');
+    var resizeHandle = win.querySelector('.win-resize');
+    var dragging = false, offX = 0, offY = 0;
+    var resizing = false, startW = 0, startH = 0, startX = 0, startY = 0;
+
+    win.addEventListener('pointerdown', function(){ bringToFront(win); });
+
+    bar.addEventListener('pointerdown', function(e){
+      if(e.target.closest('.win-btn')) return;
+      if(!isDesktopMode()) return;
+      if(win.classList.contains('window--maximized')) return;
+      dragging = true;
+      var rect = win.getBoundingClientRect();
+      offX = e.clientX - rect.left;
+      offY = e.clientY - rect.top;
+      try{ bar.setPointerCapture(e.pointerId); }catch(_){}
+      win.classList.add('is-dragging');
+    });
+    bar.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var taskbarH = 56;
+      var w = win.offsetWidth, h = win.offsetHeight;
+      var x = e.clientX - offX;
+      var y = e.clientY - offY;
+      x = Math.max(0, Math.min(x, window.innerWidth - w));
+      y = Math.max(0, Math.min(y, window.innerHeight - taskbarH - h));
+      win.style.left = x+'px';
+      win.style.top = y+'px';
+    });
+    function endDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      win.classList.remove('is-dragging');
+      try{ bar.releasePointerCapture(e.pointerId); }catch(_){}
+    }
+    bar.addEventListener('pointerup', endDrag);
+    bar.addEventListener('pointercancel', endDrag);
+
+    if(resizeHandle){
+      resizeHandle.addEventListener('pointerdown', function(e){
+        if(!isDesktopMode()) return;
+        e.stopPropagation();
+        resizing = true;
+        var rect = win.getBoundingClientRect();
+        startW = rect.width; startH = rect.height;
+        startX = e.clientX; startY = e.clientY;
+        try{ resizeHandle.setPointerCapture(e.pointerId); }catch(_){}
+        win.classList.add('is-resizing');
+        bringToFront(win);
+      });
+      resizeHandle.addEventListener('pointermove', function(e){
+        if(!resizing) return;
+        var taskbarH = 56;
+        var rect = win.getBoundingClientRect();
+        var maxW = window.innerWidth - rect.left - 8;
+        var maxH = window.innerHeight - taskbarH - rect.top - 8;
+        var newW = Math.max(240, Math.min(maxW, startW + (e.clientX - startX)));
+        var newH = Math.max(180, Math.min(maxH, startH + (e.clientY - startY)));
+        win.style.width = newW+'px';
+        win.style.height = newH+'px';
+      });
+      function endResize(e){
+        if(!resizing) return;
+        resizing = false;
+        win.classList.remove('is-resizing');
+        try{ resizeHandle.releasePointerCapture(e.pointerId); }catch(_){}
+      }
+      resizeHandle.addEventListener('pointerup', endResize);
+      resizeHandle.addEventListener('pointercancel', endResize);
+    }
+
+    if(minBtn){
+      minBtn.addEventListener('click', function(){
+        animateMinimize(win);
+        setTaskbarState(win.dataset.window, true);
+      });
+    }
+
+    if(maxBtn){
+      maxBtn.addEventListener('click', function(){
+        win.classList.add('window--anim-maximize');
+        void win.offsetHeight;
+        win.classList.toggle('window--maximized');
+        var maximized = win.classList.contains('window--maximized');
+        maxBtn.setAttribute('aria-label', maximized ? 'Restore window' : 'Maximize window');
+        bringToFront(win);
+        requestAnimationFrame(function(){
+          win.classList.remove('window--anim-maximize');
+        });
+      });
+    }
+
+    if(closeBtn){
+      closeBtn.addEventListener('click', function(){
+        animateHide(win, 'window--anim-out', 'window--closed');
+        setTaskbarState(win.dataset.window, false);
+      });
+    }
+  });
+
+  Array.prototype.slice.call(document.querySelectorAll('.taskbar__btn[data-window]')).forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var win = document.querySelector('.window[data-window="'+btn.dataset.window+'"]');
+      if(!win) return;
+      animateShow(win);
+      bringToFront(win);
+      setTaskbarState(btn.dataset.window, true);
+      win.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block:'center'
+      });
+    });
+  });
+})();
+
+(function(){
+  function pieceColor(p){ return p ? p[0] : null; }
+  function pieceType(p){ return p ? p[1] : null; }
+  function isInside(r,c){ return r>=0 && r<8 && c>=0 && c<8; }
+  function cloneBoard(b){ return b.map(function(row){ return row.slice(); }); }
+  function squareName(r,c){ return 'abcdefgh'[c] + (8-r); }
+
+  function createInitialState(){
+    var back = ['R','N','B','Q','K','B','N','R'];
+    var board = [];
+    for(var r=0;r<8;r++){ board.push(new Array(8).fill(null)); }
+    for(var c=0;c<8;c++){
+      board[0][c] = 'b'+back[c];
+      board[1][c] = 'bP';
+      board[6][c] = 'wP';
+      board[7][c] = 'w'+back[c];
+    }
+    return { board:board, turn:'w', castling:{ w:{K:true,Q:true}, b:{K:true,Q:true} }, enPassant:null, captured:{ w:[], b:[] }, history:[] };
+  }
+
+  function isSquareAttacked(board, r, c, byColor){
+    var dc, pr, pc, dr, i;
+    for(dc=-1; dc<=1; dc+=2){
+      pr = byColor==='w' ? r+1 : r-1;
+      pc = c+dc;
+      if(isInside(pr,pc) && board[pr][pc]===byColor+'P') return true;
+    }
+    var knightDeltas = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+    for(i=0;i<knightDeltas.length;i++){
+      var nr=r+knightDeltas[i][0], nc=c+knightDeltas[i][1];
+      if(isInside(nr,nc) && board[nr][nc]===byColor+'N') return true;
+    }
+    for(dr=-1; dr<=1; dr++){
+      for(dc=-1; dc<=1; dc++){
+        if(dr===0 && dc===0) continue;
+        var kr=r+dr, kc=c+dc;
+        if(isInside(kr,kc) && board[kr][kc]===byColor+'K') return true;
+      }
+    }
+    var diagDirs=[[-1,-1],[-1,1],[1,-1],[1,1]];
+    for(i=0;i<diagDirs.length;i++){
+      dr=diagDirs[i][0]; dc=diagDirs[i][1];
+      var nr2=r+dr, nc2=c+dc;
+      while(isInside(nr2,nc2)){
+        var p=board[nr2][nc2];
+        if(p){ if(pieceColor(p)===byColor && (pieceType(p)==='B'||pieceType(p)==='Q')) return true; break; }
+        nr2+=dr; nc2+=dc;
+      }
+    }
+    var orthoDirs=[[-1,0],[1,0],[0,-1],[0,1]];
+    for(i=0;i<orthoDirs.length;i++){
+      dr=orthoDirs[i][0]; dc=orthoDirs[i][1];
+      var nr3=r+dr, nc3=c+dc;
+      while(isInside(nr3,nc3)){
+        var p2=board[nr3][nc3];
+        if(p2){ if(pieceColor(p2)===byColor && (pieceType(p2)==='R'||pieceType(p2)==='Q')) return true; break; }
+        nr3+=dr; nc3+=dc;
+      }
+    }
+    return false;
+  }
+
+  function findKing(board, color){
+    for(var r=0;r<8;r++) for(var c=0;c<8;c++) if(board[r][c]===color+'K') return {r:r,c:c};
+    return null;
+  }
+  function isInCheck(board, color){
+    var k = findKing(board, color);
+    if(!k) return false;
+    return isSquareAttacked(board, k.r, k.c, color==='w'?'b':'w');
+  }
+
+  function makeMove(fr,fc,tr,tc,promotion,extra){
+    var m = { from:{r:fr,c:fc}, to:{r:tr,c:tc}, promotion: promotion || null };
+    if(extra) for(var k in extra) m[k]=extra[k];
+    return m;
+  }
+
+  function generatePseudoMoves(state, r, c){
+    var board = state.board;
+    var p = board[r][c];
+    if(!p) return [];
+    var color = pieceColor(p), type = pieceType(p);
+    var moves = [];
+
+    if(type==='P'){
+      var dir = color==='w' ? -1 : 1;
+      var startRow = color==='w' ? 6 : 1;
+      var promoRow = color==='w' ? 0 : 7;
+      if(isInside(r+dir,c) && !board[r+dir][c]){
+        moves.push(makeMove(r,c,r+dir,c, r+dir===promoRow?'Q':null));
+        if(r===startRow && !board[r+2*dir][c]){
+          moves.push(makeMove(r,c,r+2*dir,c,null,{doubleStep:true}));
+        }
+      }
+      [-1,1].forEach(function(dc){
+        var nr=r+dir, nc=c+dc;
+        if(!isInside(nr,nc)) return;
+        var target = board[nr][nc];
+        if(target && pieceColor(target)!==color){
+          moves.push(makeMove(r,c,nr,nc, nr===promoRow?'Q':null));
+        } else if(!target && state.enPassant && state.enPassant.r===nr && state.enPassant.c===nc){
+          moves.push(makeMove(r,c,nr,nc,null,{enPassant:true}));
+        }
+      });
+    } else if(type==='N'){
+      var knightDeltas = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+      knightDeltas.forEach(function(d){
+        var nr=r+d[0], nc=c+d[1];
+        if(!isInside(nr,nc)) return;
+        var target=board[nr][nc];
+        if(!target || pieceColor(target)!==color) moves.push(makeMove(r,c,nr,nc));
+      });
+    } else if(type==='K'){
+      for(var dr=-1;dr<=1;dr++){
+        for(var dc=-1;dc<=1;dc++){
+          if(dr===0&&dc===0) continue;
+          var nr=r+dr, nc=c+dc;
+          if(!isInside(nr,nc)) continue;
+          var target=board[nr][nc];
+          if(!target || pieceColor(target)!==color) moves.push(makeMove(r,c,nr,nc));
+        }
+      }
+      var rights = state.castling[color];
+      var enemy = color==='w' ? 'b' : 'w';
+      var row = r;
+      if(rights.K && !board[row][5] && !board[row][6] && board[row][7]===color+'R'){
+        if(!isSquareAttacked(board,row,4,enemy) && !isSquareAttacked(board,row,5,enemy) && !isSquareAttacked(board,row,6,enemy)){
+          moves.push(makeMove(row,4,row,6,null,{castle:'K'}));
+        }
+      }
+      if(rights.Q && !board[row][3] && !board[row][2] && !board[row][1] && board[row][0]===color+'R'){
+        if(!isSquareAttacked(board,row,4,enemy) && !isSquareAttacked(board,row,3,enemy) && !isSquareAttacked(board,row,2,enemy)){
+          moves.push(makeMove(row,4,row,2,null,{castle:'Q'}));
+        }
+      }
+    } else {
+      var dirs = type==='B' ? [[-1,-1],[-1,1],[1,-1],[1,1]]
+               : type==='R' ? [[-1,0],[1,0],[0,-1],[0,1]]
+               : [[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]];
+      dirs.forEach(function(d){
+        var nr=r+d[0], nc=c+d[1];
+        while(isInside(nr,nc)){
+          var target=board[nr][nc];
+          if(!target){ moves.push(makeMove(r,c,nr,nc)); }
+          else { if(pieceColor(target)!==color) moves.push(makeMove(r,c,nr,nc)); break; }
+          nr+=d[0]; nc+=d[1];
+        }
+      });
+    }
+    return moves;
+  }
+
+  function applyMoveToBoard(board, move){
+    var b = cloneBoard(board);
+    var piece = b[move.from.r][move.from.c];
+    var color = pieceColor(piece);
+    b[move.from.r][move.from.c] = null;
+    if(move.enPassant){ b[move.from.r][move.to.c] = null; }
+    b[move.to.r][move.to.c] = move.promotion ? color+move.promotion : piece;
+    if(move.castle==='K'){ b[move.from.r][5]=b[move.from.r][7]; b[move.from.r][7]=null; }
+    if(move.castle==='Q'){ b[move.from.r][3]=b[move.from.r][0]; b[move.from.r][0]=null; }
+    return b;
+  }
+
+  function getLegalMoves(state, r, c){
+    var piece = state.board[r][c];
+    if(!piece) return [];
+    var color = pieceColor(piece);
+    var pseudo = generatePseudoMoves(state, r, c);
+    return pseudo.filter(function(m){
+      var nb = applyMoveToBoard(state.board, m);
+      return !isInCheck(nb, color);
+    });
+  }
+
+  function getAllLegalMoves(state, color){
+    var all=[];
+    for(var r=0;r<8;r++){
+      for(var c=0;c<8;c++){
+        var p=state.board[r][c];
+        if(p && pieceColor(p)===color){
+          var lm = getLegalMoves(state,r,c);
+          for(var i=0;i<lm.length;i++) all.push(lm[i]);
+        }
+      }
+    }
+    return all;
+  }
+
+  function checkGameEnd(state){
+    var color = state.turn;
+    var moves = getAllLegalMoves(state, color);
+    var inCheck = isInCheck(state.board, color);
+    if(moves.length===0){
+      if(inCheck) return { over:true, result:(color==='w'?'BLACK':'WHITE')+' WINS — CHECKMATE' };
+      return { over:true, result:'DRAW — STALEMATE' };
+    }
+    if(isInsufficientMaterial(state)) return { over:true, result:'DRAW — INSUFFICIENT MATERIAL TO CHECKMATE' };
+    if(isThreefoldRepetition(state)) return { over:true, result:'DRAW — REPETITION' };
+    return { over:false, inCheck:inCheck };
+  }
+
+  function playMove(state, move){
+    var piece = state.board[move.from.r][move.from.c];
+    var color = pieceColor(piece);
+    var captured = state.board[move.to.r][move.to.c];
+    var epCaptured = null;
+
+    if(move.enPassant){
+      epCaptured = state.board[move.from.r][move.to.c];
+      state.board[move.from.r][move.to.c] = null;
+    }
+    state.board[move.from.r][move.from.c] = null;
+    state.board[move.to.r][move.to.c] = move.promotion ? color+move.promotion : piece;
+    if(move.castle==='K'){ state.board[move.from.r][5]=state.board[move.from.r][7]; state.board[move.from.r][7]=null; }
+    if(move.castle==='Q'){ state.board[move.from.r][3]=state.board[move.from.r][0]; state.board[move.from.r][0]=null; }
+
+    var cap = captured || epCaptured;
+    if(cap) state.captured[pieceColor(cap)].push(cap);
+
+    if(pieceType(piece)==='K'){ state.castling[color].K=false; state.castling[color].Q=false; }
+    if(pieceType(piece)==='R'){
+      var homeRow = color==='w'?7:0;
+      if(move.from.r===homeRow && move.from.c===0) state.castling[color].Q=false;
+      if(move.from.r===homeRow && move.from.c===7) state.castling[color].K=false;
+    }
+    if(captured && pieceType(captured)==='R'){
+      var capColor = pieceColor(captured);
+      var capHome = capColor==='w'?7:0;
+      if(move.to.r===capHome && move.to.c===0) state.castling[capColor].Q=false;
+      if(move.to.r===capHome && move.to.c===7) state.castling[capColor].K=false;
+    }
+    state.enPassant = move.doubleStep ? {r:(move.from.r+move.to.r)/2, c:move.from.c} : null;
+    state.turn = color==='w' ? 'b' : 'w';
+    return state;
+  }
+
+  function isCaptureMove(state, move){
+    return Boolean(state.board[move.to.r][move.to.c] || move.enPassant);
+  }
+
+  function simulateState(state, move){
+    var piece = state.board[move.from.r][move.from.c];
+    var color = pieceColor(piece);
+    var ns = {
+      board: applyMoveToBoard(state.board, move),
+      castling: { w:{K:state.castling.w.K,Q:state.castling.w.Q}, b:{K:state.castling.b.K,Q:state.castling.b.Q} },
+      enPassant: move.doubleStep ? {r:(move.from.r+move.to.r)/2, c:move.from.c} : null,
+      turn: color==='w' ? 'b' : 'w'
+    };
+    if(pieceType(piece)==='K'){ ns.castling[color].K=false; ns.castling[color].Q=false; }
+    if(pieceType(piece)==='R'){
+      if(move.from.c===0) ns.castling[color].Q=false;
+      if(move.from.c===7) ns.castling[color].K=false;
+    }
+    return ns;
+  }
+
+  function positionKey(state){
+    var boardKey = state.board.map(function(row){ return row.map(function(piece){ return piece || '--'; }).join(''); }).join('/');
+    var castleKey = (state.castling.w.K?'K':'') + (state.castling.w.Q?'Q':'') + (state.castling.b.K?'k':'') + (state.castling.b.Q?'q':'');
+    var epKey = state.enPassant ? state.enPassant.r+','+state.enPassant.c : '-';
+    return boardKey+' '+state.turn+' '+(castleKey || '-')+' '+epKey;
+  }
+
+  function isInsufficientMaterial(state){
+    var minorPieces = [];
+    for(var r=0;r<8;r++) for(var c=0;c<8;c++){
+      var piece = state.board[r][c];
+      if(!piece) continue;
+      var type = pieceType(piece);
+      if(type==='P' || type==='R' || type==='Q') return false;
+      if(type==='B' || type==='N') minorPieces.push({ type:type, squareColor:(r+c)%2 });
+    }
+    if(minorPieces.length===0 || minorPieces.length===1) return true;
+    return minorPieces.every(function(piece){ return piece.type==='B'; }) &&
+      minorPieces.every(function(piece){ return piece.squareColor===minorPieces[0].squareColor; });
+  }
+
+  function isThreefoldRepetition(state){
+    var currentKey = positionKey(state);
+    var occurrences = 1;
+    for(var i=0;i<stateHistory.length;i++){
+      if(positionKey(stateHistory[i])===currentKey) occurrences++;
+    }
+    return occurrences>=3;
+  }
+
+  var PIECE_VALUES = {P:100,N:320,B:330,R:500,Q:900,K:0};
+  var HARD_SEARCH_DEPTH = 3;
+  var ZACH_SEARCH_DEPTH = 3;
+  var EXTREME_SEARCH_DEPTH = 6;
+
+  function positionalValue(type, r, c, color){
+    var center = 3.5 - Math.max(Math.abs(c-3.5), Math.abs(r-3.5));
+    var advancement = color==='w' ? 6-r : r-1;
+    if(type==='P') return advancement*4 + center*2;
+    if(type==='N') return center*12;
+    if(type==='B') return center*5;
+    if(type==='R') return (c===3 || c===4 ? 5 : 0) + advancement;
+    if(type==='Q') return center*2;
+    return 0;
+  }
+
+  function evaluateBoard(board){
+    var score=0;
+    for(var r=0;r<8;r++) for(var c=0;c<8;c++){
+      var p=board[r][c];
+      if(!p) continue;
+      var val=PIECE_VALUES[pieceType(p)];
+      val += positionalValue(pieceType(p), r, c, pieceColor(p));
+      score += pieceColor(p)==='w' ? val : -val;
+    }
+    return score;
+  }
+
+  function minimax(state, depth, alpha, beta){
+    var color = state.turn;
+    var moves = getAllLegalMoves(state, color);
+    if(moves.length===0){
+      var inCheck = isInCheck(state.board, color);
+      if(inCheck) return color==='w' ? -100000 : 100000;
+      return 0;
+    }
+    if(depth===0) return evaluateBoard(state.board);
+    var i, val;
+    if(color==='w'){
+      var best=-Infinity;
+      for(i=0;i<moves.length;i++){
+        val = minimax(simulateState(state,moves[i]), depth-1, alpha, beta);
+        if(val>best) best=val;
+        if(best>alpha) alpha=best;
+        if(alpha>=beta) break;
+      }
+      return best;
+    } else {
+      var best2=Infinity;
+      for(i=0;i<moves.length;i++){
+        val = minimax(simulateState(state,moves[i]), depth-1, alpha, beta);
+        if(val<best2) best2=val;
+        if(best2<beta) beta=best2;
+        if(alpha>=beta) break;
+      }
+      return best2;
+    }
+  }
+
+  function chooseAIMove(state, difficulty){
+    var moves = getAllLegalMoves(state,'b');
+    if(moves.length===0) return null;
+    if(difficulty==='zach') return chooseZachMove(state, moves);
+    if(difficulty==='easy'){
+      return moves[Math.floor(Math.random()*moves.length)];
+    }
+    if(difficulty==='extreme'){
+      var extremeScoredMoves = [];
+      var extremeBestValue = Infinity;
+      for(var extremeIndex=0;extremeIndex<moves.length;extremeIndex++){
+        var extremeScore = minimax(simulateState(state,moves[extremeIndex]), EXTREME_SEARCH_DEPTH-1, -Infinity, Infinity);
+        extremeScoredMoves.push({ move:moves[extremeIndex], value:extremeScore });
+        if(extremeScore<extremeBestValue) extremeBestValue = extremeScore;
+      }
+      var extremeAlternatives = extremeScoredMoves.filter(function(item){ return item.value <= extremeBestValue + 25; });
+      return extremeAlternatives[Math.floor(Math.random()*extremeAlternatives.length)].move;
+    }
+    var scoredMoves = [];
+    var alpha=-Infinity, beta=Infinity;
+    for(var i=0;i<moves.length;i++){
+      var val = minimax(simulateState(state,moves[i]), HARD_SEARCH_DEPTH-1, alpha, beta);
+      scoredMoves.push({ move:moves[i], value:val });
+      if(val<beta) beta=val;
+    }
+    var bestVal = Math.min.apply(null, scoredMoves.map(function(item){ return item.value; }));
+    var alternatives = scoredMoves.filter(function(item){ return item.value <= bestVal + 12; });
+    return alternatives[Math.floor(Math.random()*alternatives.length)].move;
+  }
+
+  function chooseZachMove(state, moves){
+    var losingMoves = [];
+    var bestValue = -Infinity;
+    var candidateMoves = moves.filter(function(move){
+      var next = simulateState(state, move);
+      return !isCaptureMove(state, move) && !isInCheck(next.board, 'w');
+    });
+    if(!candidateMoves.length) candidateMoves = moves;
+
+    for(var i=0;i<candidateMoves.length;i++){
+      var move = candidateMoves[i];
+      var next = simulateState(state, move);
+
+      var value = -minimax(next, ZACH_SEARCH_DEPTH, -Infinity, Infinity);
+      if(value > bestValue){
+        bestValue = value;
+        losingMoves = [move];
+      } else if(value===bestValue){
+        losingMoves.push(move);
+      }
+    }
+
+    if(losingMoves.length) return losingMoves[Math.floor(Math.random()*losingMoves.length)];
+    return candidateMoves[Math.floor(Math.random()*candidateMoves.length)];
+  }
+
+  var UNICODE = { wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙', bK:'♚', bQ:'♛', bR:'♜', bB:'♝', bN:'♞', bP:'♟' };
+
+  var boardEl = document.getElementById('chessBoard');
+  var turnEl = document.getElementById('chessTurn');
+  var msgEl = document.getElementById('chessMsg');
+  var capWhiteEl = document.getElementById('capturedByWhite');
+  var capBlackEl = document.getElementById('capturedByBlack');
+  var botLabel = document.getElementById('chessBot');
+  var difficultyBtn = document.getElementById('chessDifficulty');
+  var newBtn = document.getElementById('chessNewBtn');
+  var undoBtn = document.getElementById('chessUndoBtn');
+  var botMenu = document.getElementById('botMenu');
+  var botMenuCloseBtn = document.getElementById('botMenuClose');
+  var botOptions = Array.prototype.slice.call(document.querySelectorAll('#botMenu .bot-menu__option'));
+  var promotionMenu = document.getElementById('promotionMenu');
+  var promotionMenuCloseBtn = document.getElementById('promotionMenuClose');
+  var promotionOptions = Array.prototype.slice.call(document.querySelectorAll('[data-promotion]'));
+
+  var chessState, stateHistory, selected, legalTargets, gameOver, aiThinking, difficulty, animatedMove, pendingPromotion;
+
+  function syncBotMenu(){
+    botOptions.forEach(function(option){
+      option.setAttribute('aria-pressed', String(option.dataset.bot===difficulty));
+    });
+  }
+
+  function closeBotMenu(){
+    botMenu.hidden = true;
+    difficultyBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function openBotMenu(){
+    syncBotMenu();
+    botMenu.hidden = false;
+    difficultyBtn.setAttribute('aria-expanded', 'true');
+    botOptions.filter(function(option){ return option.dataset.bot===difficulty; })[0].focus();
+  }
+
+  difficultyBtn.addEventListener('click', openBotMenu);
+  botMenuCloseBtn.addEventListener('click', closeBotMenu);
+  botMenu.addEventListener('click', function(event){
+    if(event.target===botMenu) closeBotMenu();
+  });
+  botOptions.forEach(function(option){
+    option.addEventListener('click', function(){
+      difficulty = option.dataset.bot;
+      botLabel.textContent = 'MODE: ' + difficulty.toUpperCase();
+      if(difficulty==='1v1') updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
+      syncBotMenu();
+      closeBotMenu();
+    });
+  });
+  document.addEventListener('keydown', function(event){
+    if(event.key!=='Escape') return;
+    if(!botMenu.hidden) closeBotMenu();
+    else if(!promotionMenu.hidden) closePromotionMenu();
+  });
+
+  function closePromotionMenu(){
+    promotionMenu.hidden = true;
+    pendingPromotion = null;
+    selected = null;
+    legalTargets = [];
+    renderBoard();
+  }
+
+  function openPromotionMenu(move){
+    pendingPromotion = move;
+    promotionMenu.hidden = false;
+    promotionOptions[0].focus();
+  }
+
+  promotionMenuCloseBtn.addEventListener('click', closePromotionMenu);
+  promotionMenu.addEventListener('click', function(event){
+    if(event.target===promotionMenu) closePromotionMenu();
+  });
+  promotionOptions.forEach(function(option){
+    option.addEventListener('click', function(){
+      if(!pendingPromotion) return;
+      pendingPromotion.promotion = option.dataset.promotion;
+      var move = pendingPromotion;
+      pendingPromotion = null;
+      promotionMenu.hidden = true;
+      commitMove(move);
+      selected = null;
+      legalTargets = [];
+      renderBoard();
+      afterHumanMove();
+    });
+  });
+
+  function cloneState(s){
+    return {
+      board: cloneBoard(s.board),
+      castling: { w:{K:s.castling.w.K,Q:s.castling.w.Q}, b:{K:s.castling.b.K,Q:s.castling.b.Q} },
+      enPassant: s.enPassant ? {r:s.enPassant.r, c:s.enPassant.c} : null,
+      turn: s.turn,
+      captured: { w:s.captured.w.slice(), b:s.captured.b.slice() }
+    };
+  }
+
+  function renderBoard(){
+    var checkSq = isInCheck(chessState.board, chessState.turn) ? findKing(chessState.board, chessState.turn) : null;
+    boardEl.innerHTML = '';
+    for(var r=0;r<8;r++){
+      for(var c=0;c<8;c++){
+        var sq = document.createElement('button');
+        sq.type = 'button';
+        sq.className = 'chess-sq ' + ((r+c)%2===0 ? 'chess-sq--light' : 'chess-sq--dark');
+        var piece = chessState.board[r][c];
+        if(piece){
+          var pieceEl = document.createElement('span');
+          pieceEl.className = 'chess-piece';
+          pieceEl.textContent = UNICODE[piece];
+          if(animatedMove && animatedMove.to.r===r && animatedMove.to.c===c){
+            pieceEl.classList.add('chess-piece--moving');
+            pieceEl.style.setProperty('--move-x', animatedMove.from.c - animatedMove.to.c);
+            pieceEl.style.setProperty('--move-y', animatedMove.from.r - animatedMove.to.r);
+          }
+          sq.appendChild(pieceEl);
+          sq.classList.add(pieceColor(piece)==='w' ? 'chess-sq--whitePiece' : 'chess-sq--blackPiece');
+        }
+        if(selected && selected.r===r && selected.c===c) sq.classList.add('chess-sq--selected');
+        if(legalTargets.some(function(m){ return m.to.r===r && m.to.c===c; })){
+          sq.classList.add(piece ? 'chess-sq--capture' : 'chess-sq--legal');
+        }
+        if(checkSq && checkSq.r===r && checkSq.c===c) sq.classList.add('chess-sq--check');
+        sq.setAttribute('aria-label', squareName(r,c) + (piece ? ' ' + piece : ' empty'));
+        sq.dataset.r = r; sq.dataset.c = c;
+        sq.addEventListener('click', onSquareClick);
+        boardEl.appendChild(sq);
+      }
+    }
+    animatedMove = null;
+  }
+
+  function updateHud(){
+    turnEl.textContent = gameOver ? 'GAME OVER' : (chessState.turn==='w' ? 'WHITE TO MOVE' : 'BLACK TO MOVE');
+    capWhiteEl.textContent = chessState.captured.b.map(function(p){ return UNICODE[p]; }).join(' ');
+    capBlackEl.textContent = chessState.captured.w.map(function(p){ return UNICODE[p]; }).join(' ');
+  }
+
+  function commitMove(move){
+    stateHistory.push(cloneState(chessState));
+    playMove(chessState, move);
+    animatedMove = move;
+  }
+
+  function finishGame(result){
+    gameOver = true;
+    msgEl.textContent = result;
+    selected = null; legalTargets = [];
+    renderBoard();
+    updateHud();
+  }
+
+  function updateTwoPlayerMessage(inCheck){
+    msgEl.textContent = inCheck ? 'CHECK — ' + (chessState.turn==='w' ? 'WHITE' : 'BLACK') + ' TO MOVE' : (chessState.turn==='w' ? 'WHITE' : 'BLACK') + ' TO MOVE';
+  }
+
+  function afterHumanMove(){
+    updateHud();
+    var end = checkGameEnd(chessState);
+    if(end.over){ finishGame(end.result); return; }
+    if(difficulty==='1v1'){
+      updateTwoPlayerMessage(end.inCheck);
+      return;
+    }
+    msgEl.textContent = end.inCheck ? 'CHECK — BLACK IS THINKING...' : 'BLACK IS THINKING...';
+    aiThinking = true;
+    setTimeout(function(){
+      if(difficulty==='1v1'){
+        aiThinking = false;
+        updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
+        return;
+      }
+      var aiMove = chooseAIMove(chessState, difficulty);
+      if(aiMove){
+        stateHistory.push(cloneState(chessState));
+        playMove(chessState, aiMove);
+        animatedMove = aiMove;
+      }
+      aiThinking = false;
+      renderBoard();
+      updateHud();
+      var end2 = checkGameEnd(chessState);
+      if(end2.over){ finishGame(end2.result); }
+      else { msgEl.textContent = end2.inCheck ? 'CHECK — YOUR MOVE' : 'YOUR MOVE — WHITE'; }
+    }, 350);
+  }
+
+  function onSquareClick(){
+    if(gameOver || aiThinking || (difficulty!=='1v1' && chessState.turn!=='w')) return;
+    var r = +this.dataset.r, c = +this.dataset.c;
+    var piece = chessState.board[r][c];
+
+    if(selected){
+      var move = legalTargets.filter(function(m){ return m.to.r===r && m.to.c===c; })[0];
+      if(move){
+        if(move.promotion){
+          openPromotionMenu(move);
+          return;
+        }
+        commitMove(move);
+        selected = null; legalTargets = [];
+        renderBoard();
+        afterHumanMove();
+        return;
+      }
+    }
+    if(piece && pieceColor(piece)===chessState.turn){
+      selected = {r:r,c:c};
+      legalTargets = getLegalMoves(chessState, r, c);
+    } else {
+      selected = null; legalTargets = [];
+    }
+    renderBoard();
+  }
+
+  function newGame(){
+    chessState = createInitialState();
+    stateHistory = [];
+    selected = null; legalTargets = [];
+    gameOver = false; aiThinking = false;
+    msgEl.textContent = 'YOUR MOVE — WHITE';
+    renderBoard();
+    updateHud();
+  }
+
+  difficulty = 'hard';
+  botLabel.textContent = 'MODE: ' + difficulty.toUpperCase();
+  syncBotMenu();
+
+  newBtn.addEventListener('click', newGame);
+  undoBtn.addEventListener('click', function(){
+    if(aiThinking) return;
+    if(stateHistory.length>=2){
+      stateHistory.pop();
+      chessState = stateHistory.pop();
+    } else if(stateHistory.length===1){
+      chessState = stateHistory.pop();
+    } else {
+      return;
+    }
+    selected = null; legalTargets = []; gameOver = false;
+    if(difficulty==='1v1') updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
+    else msgEl.textContent = 'YOUR MOVE — WHITE';
+    renderBoard();
+    updateHud();
+  });
+
+  legalTargets = [];
+  newGame();
+})();
+</script>
+</body>
+</html>
