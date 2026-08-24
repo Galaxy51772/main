@@ -25,10 +25,21 @@
     --signal:#4dffb0;
     --alert:#ff5f9e;
     --shadow:#05030a;
+    --board-light:#241c38;
+    --board-dark:#160f22;
     --font-display:'VT323', monospace;
     --font-body:'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
     --radius:3px;
   }
+  body[data-theme="amber"]{ --void:#120d08; --panel:#21160d; --panel-alt:#2b1c10; --chrome:#76552e; --ink:#fff0d0; --ink-dim:#c29c65; --glow:#ffb84d; --signal:#b8ff71; --alert:#ff8066; --board-light:#4a351f; --board-dark:#28170d; }
+  body[data-theme="ice"]{ --void:#071117; --panel:#0d1d25; --panel-alt:#122934; --chrome:#356276; --ink:#e1f7ff; --ink-dim:#8eb7c7; --glow:#62d9ff; --signal:#9dffcf; --alert:#ff789d; --board-light:#1d3c4a; --board-dark:#0b202b; }
+  body[data-theme="forest"]{ --void:#07110b; --panel:#102016; --panel-alt:#173020; --chrome:#39704d; --ink:#e5f8e8; --ink-dim:#91b99a; --glow:#72e08a; --signal:#d5ff72; --alert:#ff7890; --board-light:#285637; --board-dark:#10291b; }
+  body[data-theme="rose"]{ --void:#14090f; --panel:#24111c; --panel-alt:#351727; --chrome:#7d3d5d; --ink:#ffe8f0; --ink-dim:#c795aa; --glow:#ff80b2; --signal:#a8ffd1; --alert:#ffb04d; --board-light:#5b2942; --board-dark:#291321; }
+  body[data-background="grid"]{ background-color:var(--void); background-image:linear-gradient(rgba(162,118,255,.08) 1px, transparent 1px),linear-gradient(90deg, rgba(162,118,255,.08) 1px, transparent 1px); background-size:28px 28px; }
+  body[data-background="sunset"]{ background-color:var(--void); background-image:radial-gradient(circle at 18% 22%, rgba(255,95,158,.22), transparent 34%),radial-gradient(circle at 82% 76%, rgba(77,255,176,.14), transparent 38%); background-attachment:fixed; background-size:100% 100%; background-repeat:no-repeat; }
+  body.compact-mode{ --radius:0; }
+  body.compact-mode .window__body{ padding:10px; gap:6px; }
+  body.compact-mode .window{ min-height:150px; }
 
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
@@ -173,8 +184,8 @@
   .chess-board-wrap{ container-type:inline-size; width:100%; max-width:440px; }
   .chess-board{ display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); aspect-ratio:1; border:1px solid var(--chrome); }
   .chess-sq{ position:relative; display:flex; align-items:center; justify-content:center; border:none; padding:0; margin:0; cursor:pointer; font-size:9cqw; line-height:1; }
-  .chess-sq--light{ background:#241c38; }
-  .chess-sq--dark{ background:#160f22; }
+  .chess-sq--light{ background:var(--board-light); }
+  .chess-sq--dark{ background:var(--board-dark); }
   .chess-piece{ display:grid; place-items:center; width:100%; height:100%; position:relative; z-index:1; }
   .chess-piece--moving{ animation:chess-piece-move .28s cubic-bezier(.2,.8,.2,1); }
   @keyframes chess-piece-move{
@@ -184,6 +195,8 @@
   .chess-sq--whitePiece{ color:#f3efff; text-shadow:0 0 4px rgba(255,255,255,.35); }
   .chess-sq--blackPiece{ color:#0a0710; text-shadow:0 0 3px rgba(162,118,255,.5); }
   .chess-sq--selected{ box-shadow:inset 0 0 0 2px var(--glow); }
+  .chess-sq--last-from{ background:rgba(255,196,92,.28) !important; box-shadow:inset 0 0 0 2px rgba(255,196,92,.75); }
+  .chess-sq--last-to{ background:rgba(77,255,176,.28) !important; box-shadow:inset 0 0 0 2px rgba(77,255,176,.75); }
   .chess-sq--legal::after{ content:''; width:.32em; height:.32em; border-radius:50%; background:var(--signal); opacity:.6; }
   .chess-sq--capture{ box-shadow:inset 0 0 0 2px var(--alert); }
   .chess-sq--check{ background:rgba(255,95,158,.35) !important; }
@@ -192,6 +205,30 @@
   .chess__capturedRow small{ font-size:.6rem; color:var(--ink-dim); letter-spacing:.05em; width:6em; flex:none; text-transform:uppercase; }
   .game__msg{ min-height:1.2em; font-size:.72rem; color:var(--ink-dim); letter-spacing:.04em; text-align:center; }
   .game__controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .move-history{ width:100%; max-height:180px; overflow-y:auto; padding:8px; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink-dim); font-size:.72rem; }
+  .move-history[hidden]{ display:none; }
+  .move-history__row{ display:grid; grid-template-columns:2.5em 1fr 1fr; gap:8px; padding:3px 0; border-bottom:1px solid rgba(70,58,107,.45); }
+  .move-history__row:last-child{ border-bottom:0; }
+  .move-history__number{ color:var(--glow); }
+  .settings-list{ display:grid; gap:12px; }
+  .settings-row{ display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px; padding:10px; background:var(--panel-alt); border:1px solid var(--chrome); }
+  .settings-row label{ color:var(--ink-dim); font-size:.78rem; }
+  .settings-row select, .settings-row input[type="range"]{ min-width:120px; accent-color:var(--glow); }
+  .settings-row select{ padding:5px; background:var(--panel); border:1px solid var(--chrome); color:var(--ink); font:inherit; }
+  .settings-row input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--signal); }
+  .achievement-list{ display:grid; gap:8px; max-height:min(420px,calc(100vh - 220px)); overflow-y:auto; padding-right:4px; }
+  .achievement{ display:grid; grid-template-columns:32px minmax(0,1fr); gap:10px; align-items:center; padding:9px; border:1px solid var(--chrome); color:var(--ink-dim); }
+  .achievement.is-unlocked{ border-color:var(--signal); color:var(--ink); }
+  .achievement__icon{ color:var(--chrome); font-size:1.3rem; text-align:center; }
+  .achievement.is-unlocked .achievement__icon{ color:var(--signal); }
+  .achievement__name{ display:block; font-family:var(--font-display); font-size:1.2rem; }
+  .achievement__detail{ display:block; font-size:.68rem; }
+  .achievement-summary{ margin:0; color:var(--ink-dim); font-size:.75rem; }
+  .achievement-more{ width:100%; margin-top:10px; }
+  .achievement-toast{ position:fixed; top:18px; right:18px; z-index:9800; width:min(280px,calc(100vw - 36px)); padding:12px 14px; background:var(--panel); border:1px solid var(--signal); box-shadow:5px 5px 0 var(--shadow), 0 0 18px rgba(77,255,176,.2); transform:translateX(0); opacity:1; transition:opacity .2s ease, transform .2s ease; }
+  .achievement-toast[hidden]{ display:block; opacity:0; pointer-events:none; transform:translateX(24px); }
+  .achievement-toast__title{ display:block; color:var(--signal); font-family:var(--font-display); font-size:1.3rem; }
+  .achievement-toast__label{ display:block; margin-top:3px; color:var(--ink-dim); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; }
   .win-action{ font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; background:transparent; border:1px solid var(--glow); color:var(--glow); border-radius:2px; cursor:pointer; box-shadow:3px 3px 0 0 var(--shadow); transition:transform .06s ease, box-shadow .06s ease; }
   .win-action:active{ transform:translate(3px,3px); box-shadow:none; }
   .win-action:disabled{ opacity:.35; cursor:default; border-color:var(--chrome); color:var(--ink-dim); box-shadow:none; transform:none; }
@@ -204,6 +241,10 @@
   .taskbar__btn:active{ transform:translate(2px,2px); box-shadow:none; }
   .taskbar__btn.is-open{ color:var(--signal); border-color:var(--signal); }
   .taskbar__right{ display:flex; align-items:center; gap:10px; }
+  .language-picker{ position:relative; }
+  .language-menu{ position:absolute; right:0; bottom:calc(100% + 8px); display:grid; gap:4px; min-width:110px; padding:5px; background:var(--panel); border:1px solid var(--chrome); box-shadow:4px 4px 0 var(--shadow); }
+  .language-menu[hidden]{ display:none; }
+  .language-menu .taskbar__btn{ width:100%; text-align:left; }
   .taskbar__clock{ font-size:.72rem; color:var(--ink-dim); min-width:3.2em; text-align:right; }
 
   .bot-menu{ position:fixed; inset:0; z-index:9500; display:grid; place-items:center; padding:24px; background:rgba(11,9,18,.86); }
@@ -221,6 +262,10 @@
   .bot-menu__name{ display:block; font-family:var(--font-display); font-size:1.35rem; }
   .bot-menu__detail{ display:block; margin-top:4px; color:var(--ink-dim); font-size:.68rem; line-height:1.35; }
   .bot-menu__option:hover .bot-menu__detail, .bot-menu__option[aria-pressed="true"] .bot-menu__detail{ color:var(--ink); }
+  .custom-depth-form{ display:grid; gap:12px; }
+  .custom-depth-form label{ color:var(--ink-dim); font-size:.78rem; }
+  .custom-depth-form input{ width:100%; padding:8px 10px; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink); font:inherit; }
+  .custom-depth-form__actions{ display:flex; justify-content:flex-end; gap:8px; }
 
   @media (max-width:920px){
     .window{ position:static !important; left:auto !important; top:auto !important; width:100% !important; height:auto !important; margin:0 0 16px; }
@@ -254,7 +299,7 @@
 
 <div class="boot" id="boot">
   <div id="bootLines"></div>
-  <div class="boot-skip">press any key or tap to skip</div>
+  <div class="boot-skip" data-i18n="bootSkip">press any key or tap to skip</div>
 </div>
 
 <div class="crt-overlay" aria-hidden="true"></div>
@@ -263,18 +308,40 @@
   <div class="bot-menu__panel">
     <div class="bot-menu__bar">
       <span class="window__icon">♞</span>
-      <span class="bot-menu__title" id="botMenuTitle">SELECT MODE</span>
-      <button class="win-btn bot-menu__close" id="botMenuClose" type="button" aria-label="Close bot menu">×</button>
+      <span class="bot-menu__title" id="botMenuTitle" data-i18n="selectMode">SELECT MODE</span>
+      <button class="win-btn bot-menu__close" id="botMenuClose" type="button" data-i18n-aria="closeBotMenu" aria-label="Close bot menu">×</button>
     </div>
     <div class="bot-menu__body">
-      <p class="bot-menu__prompt">CHESS.EXE / SELECT OPPONENT OR 1V1 MODE</p>
+      <p class="bot-menu__prompt" data-i18n="selectOpponent">CHESS.EXE / SELECT OPPONENT OR 1V1 MODE</p>
       <div class="bot-menu__options">
-        <button class="bot-menu__option" type="button" data-bot="1v1" aria-pressed="false"><span class="bot-menu__name">1V1</span><span class="bot-menu__detail">Two players, one computer.</span></button>
-        <button class="bot-menu__option" type="button" data-bot="easy" aria-pressed="false"><span class="bot-menu__name">EASY</span><span class="bot-menu__detail">Random moves.</span></button>
-        <button class="bot-menu__option" type="button" data-bot="hard" aria-pressed="false"><span class="bot-menu__name">HARD</span><span class="bot-menu__detail">Basic tactical search.</span></button>
-        <button class="bot-menu__option" type="button" data-bot="zach" aria-pressed="false"><span class="bot-menu__name">ZACH</span><span class="bot-menu__detail">Try loosing with it.</span></button>
-        <button class="bot-menu__option" type="button" data-bot="extreme" aria-pressed="false"><span class="bot-menu__name">EXTREME</span><span class="bot-menu__detail">Deepest available search (depth: 6). Can sometimes crash your browser.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="1v1" aria-pressed="false"><span class="bot-menu__name">1V1</span><span class="bot-menu__detail" data-i18n="bot1v1">Two players, one computer.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="easy" aria-pressed="false"><span class="bot-menu__name">EASY</span><span class="bot-menu__detail" data-i18n="botEasy">Random moves.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="hard" aria-pressed="false"><span class="bot-menu__name">HARD</span><span class="bot-menu__detail" data-i18n="botHard">Basic tactical search.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="zach" aria-pressed="false"><span class="bot-menu__name">ZACH</span><span class="bot-menu__detail" data-i18n="botZach">Try loosing with it.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="extreme" aria-pressed="false"><span class="bot-menu__name">EXTREME</span><span class="bot-menu__detail" data-i18n="botExtreme">Deepest available search (depth: 6). Can sometimes crash your browser.</span></button>
+        <button class="bot-menu__option" type="button" data-bot="custom" aria-pressed="false"><span class="bot-menu__name" data-i18n="custom">CUSTOM</span><span class="bot-menu__detail" data-i18n="botCustom">Choose the search depth.</span></button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="bot-menu" id="customDepthMenu" role="dialog" aria-modal="true" aria-labelledby="customDepthTitle" hidden>
+  <div class="bot-menu__panel">
+    <div class="bot-menu__bar">
+      <span class="window__icon">⌘</span>
+      <span class="bot-menu__title" id="customDepthTitle" data-i18n="customTitle">CUSTOM BOT</span>
+      <button class="win-btn bot-menu__close" id="customDepthClose" type="button" data-i18n-aria="cancelCustom" aria-label="Cancel custom bot">×</button>
+    </div>
+    <div class="bot-menu__body">
+      <p class="bot-menu__prompt" data-i18n="customPrompt">CHESS.EXE / SET SEARCH DEPTH</p>
+      <form class="custom-depth-form" id="customDepthForm">
+        <label for="customDepthInput" data-i18n="depthLabel">Depth (1-8)</label>
+        <input id="customDepthInput" type="number" min="1" max="8" step="1" value="3" required>
+        <div class="custom-depth-form__actions">
+          <button class="win-action" id="customDepthCancel" type="button" data-i18n="cancel">CANCEL</button>
+          <button class="win-action" type="submit" data-i18n="apply">APPLY</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -283,16 +350,16 @@
   <div class="bot-menu__panel">
     <div class="bot-menu__bar">
       <span class="window__icon">♟</span>
-      <span class="bot-menu__title" id="promotionMenuTitle">PROMOTE PAWN</span>
-      <button class="win-btn bot-menu__close" id="promotionMenuClose" type="button" aria-label="Cancel promotion">×</button>
+      <span class="bot-menu__title" id="promotionMenuTitle" data-i18n="promotePawn">PROMOTE PAWN</span>
+      <button class="win-btn bot-menu__close" id="promotionMenuClose" type="button" data-i18n-aria="cancelPromotion" aria-label="Cancel promotion">×</button>
     </div>
     <div class="bot-menu__body">
-      <p class="bot-menu__prompt">CHESS.EXE / SELECT PROMOTION PIECE</p>
+      <p class="bot-menu__prompt" data-i18n="selectPromotion">CHESS.EXE / SELECT PROMOTION PIECE</p>
       <div class="bot-menu__options">
-        <button class="bot-menu__option" type="button" data-promotion="Q"><span class="bot-menu__name">QUEEN</span><span class="bot-menu__detail">Maximum power.</span></button>
-        <button class="bot-menu__option" type="button" data-promotion="R"><span class="bot-menu__name">ROOK</span><span class="bot-menu__detail">Straight-line attack.</span></button>
-        <button class="bot-menu__option" type="button" data-promotion="B"><span class="bot-menu__name">BISHOP</span><span class="bot-menu__detail">Diagonal attack.</span></button>
-        <button class="bot-menu__option" type="button" data-promotion="N"><span class="bot-menu__name">KNIGHT</span><span class="bot-menu__detail">Jumping attack.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="Q"><span class="bot-menu__name" data-i18n="queen">QUEEN</span><span class="bot-menu__detail" data-i18n="queenDetail">Maximum power.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="R"><span class="bot-menu__name" data-i18n="rook">ROOK</span><span class="bot-menu__detail" data-i18n="rookDetail">Straight-line attack.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="B"><span class="bot-menu__name" data-i18n="bishop">BISHOP</span><span class="bot-menu__detail" data-i18n="bishopDetail">Diagonal attack.</span></button>
+        <button class="bot-menu__option" type="button" data-promotion="N"><span class="bot-menu__name" data-i18n="knight">KNIGHT</span><span class="bot-menu__detail" data-i18n="knightDetail">Jumping attack.</span></button>
       </div>
     </div>
   </div>
@@ -304,83 +371,129 @@
   <section class="window" data-window="identity" style="--x:28px; --y:24px;">
     <header class="window__bar" data-drag-handle>
       <span class="window__icon">◆</span>
-      <span class="window__title">IDENTITY.EXE</span>
-      <span class="window__path">USER PROFILE</span>
+      <span class="window__title" data-i18n="identityTitle">IDENTITY.EXE</span>
+      <span class="window__path" data-i18n="userProfile">USER PROFILE</span>
       <div class="window__controls">
-        <button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button>
-        <button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button>
-        <button class="win-btn" data-action="close" aria-label="Close window">×</button>
+        <button class="win-btn" data-action="minimize" data-i18n-aria="minimizeWindow" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" data-i18n-aria="maximizeWindow" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" data-i18n-aria="closeWindow" aria-label="Close window">×</button>
       </div>
     </header>
     <div class="window__body">
       <div class="avatar" aria-hidden="true">◈</div>
       <p class="prompt">Gelmix@root: sudo whois</p>
       <h1 class="name">Gelmix</h1>
-      <p class="tagline">I like to play some games, such as minecraft and chess!</p>
-      <p class="status-line"><span class="dot"></span>STATUS: ONLINE</p>
-      <div class="section-label">Links</div>
+      <p class="tagline" data-i18n="tagline">I like to play some games, such as minecraft and chess!</p>
+      <p class="status-line"><span class="dot"></span><span data-i18n="statusOnline">STATUS: ONLINE</span></p>
+      <div class="section-label" data-i18n="links">Links</div>
       <ul class="links">
-        <li><a href="https://github.com/galaxy51772" target="_blank" rel="noopener">GITHUB<small>code</small></a></li>
-        <li><a href="https://modrinth.com/user/gelmix" target="_blank" rel="noopener">Modrinth<small>My MC projects</small></a></li>
-        <li><a href="https://youtube.com/@gelmixg" target="_blank" rel="noopener">Youtube<small>Main channel</small></a></li>
-        <li><a href="https://youtube.com/@cutebuff" target="_blank" rel="noopener">Youtube 2<small>Cute Buff channel</small></a></li>
+        <li><a href="https://github.com/galaxy51772" target="_blank" rel="noopener">GITHUB<small data-i18n="code">code</small></a></li>
+        <li><a href="https://modrinth.com/user/gelmix" target="_blank" rel="noopener">Modrinth<small data-i18n="mcProjects">My MC projects</small></a></li>
+        <li><a href="https://youtube.com/@gelmixg" target="_blank" rel="noopener">Youtube<small data-i18n="mainChannel">Main channel</small></a></li>
+        <li><a href="https://youtube.com/@cutebuff" target="_blank" rel="noopener">Youtube 2<small data-i18n="cuteBuffChannel">Cute Buff channel</small></a></li>
       </ul>
     </div>
-    <footer class="window__status">READY · 4 LINKS</footer>
+    <footer class="window__status" data-i18n="readyLinks">READY · 4 LINKS</footer>
     <div class="win-resize" data-resize-handle aria-hidden="true"></div>
   </section>
 
   <section class="window window--wide" data-window="chess" style="--x:72px; --y:64px;">
     <header class="window__bar" data-drag-handle>
       <span class="window__icon">♞</span>
-      <span class="window__title">CHESS.EXE</span>
-      <span class="window__path">PROGRAMS / GAMES</span>
+      <span class="window__title" data-i18n="chessTitle">CHESS.EXE</span>
+      <span class="window__path" data-i18n="programsGames">PROGRAMS / GAMES</span>
       <div class="window__controls">
-        <button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button>
-        <button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button>
-        <button class="win-btn" data-action="close" aria-label="Close window">×</button>
+        <button class="win-btn" data-action="minimize" data-i18n-aria="minimizeWindow" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" data-i18n-aria="maximizeWindow" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" data-i18n-aria="closeWindow" aria-label="Close window">×</button>
       </div>
     </header>
     <div class="window__body">
       <div class="chess">
         <div class="chess__hud">
           <span id="chessTurn">WHITE TO MOVE</span>
-          <button class="win-action" id="chessDifficulty" type="button" aria-haspopup="dialog" aria-expanded="false">MENU</button>
+          <button class="win-action" id="chessDifficulty" type="button" aria-haspopup="dialog" aria-expanded="false" data-i18n="menu">MENU</button>
         </div>
         <div class="chess__bot" id="chessBot">MODE: HARD</div>
         <div class="chess-board-wrap">
           <div class="chess-board" id="chessBoard" role="group" aria-label="Chess board. Click a piece, then a highlighted square to move it."></div>
         </div>
         <div class="chess__captured">
-          <div class="chess__capturedRow"><small>White took</small><span id="capturedByWhite"></span></div>
-          <div class="chess__capturedRow"><small>Black took</small><span id="capturedByBlack"></span></div>
+          <div class="chess__capturedRow"><small data-i18n="whiteTook">White took</small><span id="capturedByWhite"></span></div>
+          <div class="chess__capturedRow"><small data-i18n="blackTook">Black took</small><span id="capturedByBlack"></span></div>
         </div>
         <div class="game__msg" id="chessMsg" aria-live="polite">YOUR MOVE — WHITE</div>
+        <div class="move-history" id="moveHistory" hidden></div>
         <div class="game__controls">
-          <button class="win-action" id="chessNewBtn" type="button">NEW GAME</button>
-          <button class="win-action" id="chessUndoBtn" type="button">UNDO</button>
+          <button class="win-action" id="chessNewBtn" type="button" data-i18n="newGame">NEW GAME</button>
+          <button class="win-action" id="chessUndoBtn" type="button" data-i18n="undo">UNDO</button>
+          <button class="win-action" id="chessMovesBtn" type="button" data-i18n="showMoves" aria-expanded="false">SHOW MOVES</button>
         </div>
       </div>
     </div>
-    <footer class="window__status">CLICK A PIECE, THEN A SQUARE</footer>
+    <footer class="window__status" data-i18n="clickPiece">CLICK A PIECE, THEN A SQUARE</footer>
     <div class="win-resize" data-resize-handle aria-hidden="true"></div>
   </section>
 
   <section class="window window--anchor-right" data-window="log" style="--y:340px;">
     <header class="window__bar" data-drag-handle>
       <span class="window__icon">&gt;_</span>
-      <span class="window__title">TERMINAL.LOG</span>
-      <span class="window__path">SYSTEM</span>
+      <span class="window__title" data-i18n="terminalTitle">TERMINAL.LOG</span>
+      <span class="window__path" data-i18n="system">SYSTEM</span>
       <div class="window__controls">
-        <button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button>
-        <button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button>
-        <button class="win-btn" data-action="close" aria-label="Close window">×</button>
+        <button class="win-btn" data-action="minimize" data-i18n-aria="minimizeWindow" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" data-i18n-aria="maximizeWindow" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" data-i18n-aria="closeWindow" aria-label="Close window">×</button>
       </div>
     </header>
     <div class="window__body">
       <div class="log" id="logLines"></div>
     </div>
-    <footer class="window__status">LIVE · READ ONLY</footer>
+    <footer class="window__status" data-i18n="liveReadOnly">LIVE · READ ONLY</footer>
+    <div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+  <section class="window window--closed" data-window="customization" style="--x:28px; --y:560px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">✦</span>
+      <span class="window__title" data-i18n="customizationTitle">CUSTOMIZE.EXE</span>
+      <span class="window__path" data-i18n="settings">SETTINGS</span>
+      <div class="window__controls">
+        <button class="win-btn" data-action="minimize" data-i18n-aria="minimizeWindow" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" data-i18n-aria="maximizeWindow" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" data-i18n-aria="closeWindow" aria-label="Close window">×</button>
+      </div>
+    </header>
+    <div class="window__body settings-list">
+      <div class="settings-row"><label for="themeSelect" data-i18n="theme">Theme</label><select id="themeSelect"><option value="void" data-i18n="themeVoid">Void</option><option value="amber" data-i18n="themeAmber">Amber</option><option value="ice" data-i18n="themeIce">Ice</option><option value="forest" data-i18n="themeForest">Forest</option><option value="rose" data-i18n="themeRose">Rose</option></select></div>
+      <div class="settings-row"><label for="backgroundSelect" data-i18n="background">Background</label><select id="backgroundSelect"><option value="void" data-i18n="backgroundVoid">Void</option><option value="grid" data-i18n="backgroundGrid">Grid</option><option value="sunset" data-i18n="backgroundSunset">Sunset</option></select></div>
+      <div class="settings-row"><label for="particlesToggle" data-i18n="particles">Particle backdrop</label><input id="particlesToggle" type="checkbox" checked></div>
+      <div class="settings-row"><label for="compactToggle" data-i18n="compact">Compact windows</label><input id="compactToggle" type="checkbox"></div>
+      <div class="settings-row"><label for="fontRange" data-i18n="textSize">Text size</label><input id="fontRange" type="range" min="13" max="18" value="15"></div>
+      <button class="win-action achievement-more" id="resetCustomizationBtn" type="button" data-i18n="resetCustomization">RESET TO DEFAULT</button>
+    </div>
+    <footer class="window__status" data-i18n="settingsSaved">SETTINGS SAVED LOCALLY</footer>
+    <div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+  <section class="window window--closed" data-window="achievements" style="--x:520px; --y:560px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">★</span>
+      <span class="window__title" data-i18n="achievementsTitle">ACHIEVEMENTS.EXE</span>
+      <span class="window__path" data-i18n="progress">PROGRESS</span>
+      <div class="window__controls">
+        <button class="win-btn" data-action="minimize" data-i18n-aria="minimizeWindow" aria-label="Minimize window">–</button>
+        <button class="win-btn" data-action="maximize" data-i18n-aria="maximizeWindow" aria-label="Maximize window">□</button>
+        <button class="win-btn" data-action="close" data-i18n-aria="closeWindow" aria-label="Close window">×</button>
+      </div>
+    </header>
+    <div class="window__body">
+      <p class="achievement-summary" id="achievementSummary"></p>
+      <div class="achievement-list" id="achievementList"></div>
+      <button class="win-action achievement-more" id="achievementMore" type="button" data-i18n="showMore">SHOW MORE</button>
+      <button class="win-action achievement-more" id="clearAchievementsBtn" type="button" data-i18n="clearAchievements">CLEAR ACHIEVEMENTS</button>
+    </div>
+    <footer class="window__status" data-i18n="achievementsFooter">UNLOCKS ARE SAVED LOCALLY</footer>
     <div class="win-resize" data-resize-handle aria-hidden="true"></div>
   </section>
 
@@ -389,16 +502,248 @@
 <div class="taskbar">
   <div class="taskbar__brand">Gelmix siteOS</div>
   <div class="taskbar__windows">
-    <button class="taskbar__btn is-open" data-window="identity">Identity</button>
-    <button class="taskbar__btn is-open" data-window="chess">Chess</button>
-    <button class="taskbar__btn is-open" data-window="log">Log</button>
+    <button class="taskbar__btn is-open" data-window="identity" data-i18n="identity">Identity</button>
+    <button class="taskbar__btn is-open" data-window="chess" data-i18n="chess">Chess</button>
+    <button class="taskbar__btn is-open" data-window="log" data-i18n="log">Log</button>
+    <button class="taskbar__btn" data-window="customization" data-i18n="customization">Customize</button>
+    <button class="taskbar__btn" data-window="achievements" data-i18n="achievements">Achievements</button>
   </div>
   <div class="taskbar__right">
+    <div class="language-picker">
+      <button class="taskbar__btn" id="languageBtn" type="button" aria-haspopup="menu" aria-expanded="false" data-i18n="language">Language</button>
+      <div class="language-menu" id="languageMenu" role="menu" hidden>
+        <button class="taskbar__btn" type="button" data-language="en" role="menuitem">English</button>
+        <button class="taskbar__btn" type="button" data-language="pl" role="menuitem">Polski</button>
+      </div>
+    </div>
     <span id="clock" class="taskbar__clock">--:--</span>
   </div>
 </div>
 
+<div class="bot-menu" id="clearAchievementsMenu" role="dialog" aria-modal="true" aria-labelledby="clearAchievementsTitle" hidden>
+  <div class="bot-menu__panel">
+    <div class="bot-menu__bar">
+      <span class="window__icon">!</span>
+      <span class="bot-menu__title" id="clearAchievementsTitle" data-i18n="clearAchievements">CLEAR ACHIEVEMENTS</span>
+      <button class="win-btn bot-menu__close" id="clearAchievementsClose" type="button" data-i18n-aria="cancelClear" aria-label="Cancel clearing achievements">×</button>
+    </div>
+    <div class="bot-menu__body">
+      <p class="bot-menu__prompt" data-i18n="areYouSure">ARE YOU SURE?</p>
+      <div class="game__controls">
+        <button class="win-action" id="clearAchievementsNo" type="button" data-i18n="no">NO</button>
+        <button class="win-action" id="clearAchievementsYes" type="button" data-i18n="yes">YES</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="achievement-toast" id="achievementToast" role="status" aria-live="polite" hidden>
+  <strong class="achievement-toast__title" id="achievementToastTitle"></strong>
+  <small class="achievement-toast__label" id="achievementToastLabel">Unlocked!</small>
+</div>
+
+<div class="bot-menu" id="resetCustomizationMenu" role="dialog" aria-modal="true" aria-labelledby="resetCustomizationTitle" hidden>
+  <div class="bot-menu__panel">
+    <div class="bot-menu__bar">
+      <span class="window__icon">!</span>
+      <span class="bot-menu__title" id="resetCustomizationTitle" data-i18n="resetCustomization">RESET TO DEFAULT</span>
+      <button class="win-btn bot-menu__close" id="resetCustomizationClose" type="button" data-i18n-aria="cancelReset" aria-label="Cancel resetting customization">×</button>
+    </div>
+    <div class="bot-menu__body">
+      <p class="bot-menu__prompt" data-i18n="resetAreYouSure">RESET CUSTOMIZATION TO DEFAULT?</p>
+      <div class="game__controls">
+        <button class="win-action" id="resetCustomizationNo" type="button" data-i18n="no">NO</button>
+        <button class="win-action" id="resetCustomizationYes" type="button" data-i18n="yes">YES</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+(function(){
+  var translations = {
+    en: {
+      bootSkip:'press any key or tap to skip', selectMode:'SELECT MODE', selectOpponent:'CHESS.EXE / SELECT OPPONENT OR 1V1 MODE',
+      bot1v1:'Two players, one computer.', botEasy:'Random moves.', botHard:'Basic tactical search.', botZach:'Try loosing with it.', botExtreme:'Deepest available search (depth: 4). Can sometimes crash your browser.', custom:'CUSTOM', botCustom:'Choose the search depth.', customTitle:'CUSTOM BOT', customPrompt:'CHESS.EXE / SET SEARCH DEPTH', depthLabel:'Depth (1-8)', cancel:'CANCEL', apply:'APPLY', cancelCustom:'Cancel custom bot',
+      promotePawn:'PROMOTE PAWN', selectPromotion:'CHESS.EXE / SELECT PROMOTION PIECE', queen:'QUEEN', queenDetail:'Maximum power.', rook:'ROOK', rookDetail:'Straight-line attack.', bishop:'BISHOP', bishopDetail:'Diagonal attack.', knight:'KNIGHT', knightDetail:'Jumping attack.',
+      minimizeWindow:'Minimize window', maximizeWindow:'Maximize window', restoreWindow:'Restore window', closeWindow:'Close window', cancelPromotion:'Cancel promotion', closeBotMenu:'Close bot menu',
+      tagline:'I like to play some games, such as minecraft and chess!', statusOnline:'STATUS: ONLINE', links:'Links', code:'code', mcProjects:'My MC projects', mainChannel:'Main channel', cuteBuffChannel:'Cute Buff channel', readyLinks:'READY · 4 LINKS',
+      identityTitle:'IDENTITY.EXE', userProfile:'USER PROFILE', chessTitle:'CHESS.EXE', programsGames:'PROGRAMS / GAMES', terminalTitle:'TERMINAL.LOG', system:'SYSTEM', menu:'MENU', whiteTook:'White took', blackTook:'Black took', newGame:'NEW GAME', undo:'UNDO', clickPiece:'CLICK A PIECE, THEN A SQUARE', liveReadOnly:'LIVE · READ ONLY', language:'Language', identity:'Identity', chess:'Chess', log:'Log', customization:'Customize', achievements:'Achievements', customizationTitle:'CUSTOMIZE.EXE', settings:'SETTINGS', theme:'Theme', themeVoid:'Void', themeAmber:'Amber', themeIce:'Ice', themeForest:'Forest', themeRose:'Rose', background:'Background', backgroundVoid:'Void', backgroundGrid:'Grid', backgroundSunset:'Sunset', particles:'Particle backdrop', compact:'Compact windows', textSize:'Text size', settingsSaved:'SETTINGS SAVED LOCALLY', achievementsTitle:'ACHIEVEMENTS.EXE', progress:'PROGRESS', achievementsFooter:'UNLOCKS ARE SAVED LOCALLY', unlocked:'{0}/{1} UNLOCKED',
+      achievementLanguage:'Polyglot', achievementLanguageDetail:'Switch the interface language.', achievementWindows:'Window Shopper', achievementWindowsDetail:'Open every desktop window.', achievementMove:'First Move', achievementMoveDetail:'Play your first chess move.', achievementWin:'Checkmate', achievementWinDetail:'Win a chess game.', achievementCustomize:'Customize', achievementCustomizeDetail:'Change background and theme!', achievementCustom:'Custom?!', achievementCustomDetail:'Wow! You played witch custom!', achievementFriends:'Friends', achievementFriendsDetail:'Thanks for inviting your friend to 1v1 you!', achievementSecretName:'???', achievementSecretDetail:'Bot, loose', achievementLoseZach:'Loose to Zach', achievementLoseZachDetail:'Wow! You loosed witch Zach!', unlockedLabel:'Unlocked!', showMore:'SHOW MORE', showLess:'SHOW LESS', showMoves:'SHOW MOVES', hideMoves:'HIDE MOVES', clearAchievements:'CLEAR ACHIEVEMENTS', areYouSure:'ARE YOU SURE?', yes:'YES', no:'NO', cancelClear:'Cancel clearing achievements', resetCustomization:'RESET TO DEFAULT', resetAreYouSure:'RESET CUSTOMIZATION TO DEFAULT?', cancelReset:'Cancel resetting customization', chessMove:'Chess move', victory:'Victory', defeat:'Defeat', draw:'Draw', linkOpened:'Link opened',
+      mode:'MODE: {0}', customMode:'MODE: CUSTOM (DEPTH {0})', gameOver:'GAME OVER', whiteMove:'WHITE TO MOVE', blackMove:'BLACK TO MOVE', yourMoveWhite:'YOUR MOVE — WHITE', checkWhite:'CHECK — WHITE TO MOVE', checkBlack:'CHECK — BLACK TO MOVE', checkThinking:'CHECK — BLACK IS THINKING...', thinking:'BLACK IS THINKING...', checkYourMove:'CHECK — YOUR MOVE'
+    },
+    pl: {
+      bootSkip:'naciśnij dowolny klawisz lub dotknij, aby pominąć', selectMode:'WYBIERZ TRYB', selectOpponent:'CHESS.EXE / WYBIERZ PRZECIWNIKA LUB TRYB 1V1',
+      bot1v1:'Dwóch graczy, jeden komputer.', botEasy:'Losowe ruchy.', botHard:'Podstawowe wyszukiwanie taktyczne.', botZach:'Spróbuj z nim przegrać.', botExtreme:'Najgłębsze dostępne wyszukiwanie (głębokość: 4). Czasem może zawiesić przeglądarkę.', custom:'NIESTANDARDOWY', botCustom:'Wybierz głębokość wyszukiwania.', customTitle:'BOT NIESTANDARDOWY', customPrompt:'CHESS.EXE / USTAW GŁĘBOKOŚĆ WYSZUKIWANIA', depthLabel:'Głębokość (1-8)', cancel:'ANULUJ', apply:'ZASTOSUJ', cancelCustom:'Anuluj niestandardowego bota',
+      promotePawn:'PROMOCJA PIONKA', selectPromotion:'CHESS.EXE / WYBIERZ FIGURĘ PROMOCJI', queen:'HETMAN', queenDetail:'Maksymalna siła.', rook:'WIEŻA', rookDetail:'Atak w linii prostej.', bishop:'GONIEC', bishopDetail:'Atak po przekątnej.', knight:'SKOCZEK', knightDetail:'Atak z przeskokiem.',
+      minimizeWindow:'Minimalizuj okno', maximizeWindow:'Maksymalizuj okno', restoreWindow:'Przywróć okno', closeWindow:'Zamknij okno', cancelPromotion:'Anuluj promocję', closeBotMenu:'Zamknij menu bota',
+      tagline:'Lubię grać w różne gry, takie jak Minecraft i szachy!', statusOnline:'STATUS: ONLINE', links:'Odnośniki', code:'kod', mcProjects:'Moje projekty MC', mainChannel:'Główny kanał', cuteBuffChannel:'Kanał Cute Buff', readyLinks:'GOTOWE · 4 ODNOŚNIKI',
+      identityTitle:'IDENTITY.EXE', userProfile:'PROFIL UŻYTKOWNIKA', chessTitle:'CHESS.EXE', programsGames:'PROGRAMY / GRY', terminalTitle:'TERMINAL.LOG', system:'SYSTEM', menu:'MENU', whiteTook:'Białe zbiły', blackTook:'Czarne zbiły', newGame:'NOWA GRA', undo:'COFNIJ', clickPiece:'KLIKNIJ FIGURĘ, NASTĘPNIE POLE', liveReadOnly:'NA ŻYWO · TYLKO ODCZYT', language:'Język', identity:'Tożsamość', chess:'Szachy', log:'Dziennik', customization:'Dostosuj', achievements:'Osiągnięcia', customizationTitle:'DOSTOSUJ.EXE', settings:'USTAWIENIA', theme:'Motyw', themeVoid:'Pustka', themeAmber:'Bursztyn', themeIce:'Lód', themeForest:'Las', themeRose:'Różany', background:'Tło', backgroundVoid:'Pustka', backgroundGrid:'Siatka', backgroundSunset:'Zachód słońca', particles:'Tło z cząsteczkami', compact:'Kompaktowe okna', textSize:'Rozmiar tekstu', settingsSaved:'USTAWIENIA ZAPISANE LOKALNIE', achievementsTitle:'OSIĄGNIĘCIA.EXE', progress:'POSTĘP', achievementsFooter:'ODBLOKOWANIA ZAPISANE LOKALNIE', unlocked:'{0}/{1} ODBLOKOWANE',
+      achievementLanguage:'Poliglota', achievementLanguageDetail:'Zmień język interfejsu.', achievementWindows:'Łowca okien', achievementWindowsDetail:'Otwórz każde okno pulpitu.', achievementMove:'Pierwszy ruch', achievementMoveDetail:'Wykonaj pierwszy ruch szachowy.', achievementWin:'Mat', achievementWinDetail:'Wygraj partię szachów.', achievementCustomize:'Dostosuj', achievementCustomizeDetail:'Zmień tło i motyw!', achievementCustom:'Niestandardowy?!', achievementCustomDetail:'Wow! Grasz niestandardowym botem!', achievementFriends:'Przyjaciele', achievementFriendsDetail:'Dzięki za zaproszenie znajomego do gry 1 na 1!', achievementSecretName:'???', achievementSecretDetail:'Bocie, przegraj', achievementLoseZach:'Przegrana z Zachem', achievementLoseZachDetail:'Wow! Przegrałeś z Zachem!', unlockedLabel:'Odblokowano!', showMore:'POKAŻ WIĘCEJ', showLess:'POKAŻ MNIEJ', showMoves:'POKAŻ RUCHY', hideMoves:'UKRYJ RUCHY', clearAchievements:'WYCZYŚĆ OSIĄGNIĘCIA', areYouSure:'NA PEWNO?', yes:'TAK', no:'NIE', cancelClear:'Anuluj czyszczenie osiągnięć', resetCustomization:'PRZYWRÓĆ DOMYŚLNE', resetAreYouSure:'PRZYWRÓCIĆ DOMYŚLNE USTAWIENIA?', cancelReset:'Anuluj przywracanie ustawień', chessMove:'Ruch szachowy', victory:'Zwycięstwo', defeat:'Porażka', draw:'Remis', linkOpened:'Otwarto odnośnik',
+      mode:'TRYB: {0}', customMode:'TRYB: NIESTANDARDOWY (GŁĘBOKOŚĆ {0})', gameOver:'KONIEC GRY', whiteMove:'RUCH BIAŁYCH', blackMove:'RUCH CZARNYCH', yourMoveWhite:'TWÓJ RUCH — BIAŁE', checkWhite:'SZACH — RUCH BIAŁYCH', checkBlack:'SZACH — RUCH CZARNYCH', checkThinking:'SZACH — CZARNE MYŚLĄ...', thinking:'CZARNE MYŚLĄ...', checkYourMove:'SZACH — TWÓJ RUCH'
+    }
+  };
+  var language = 'en';
+  function translate(key){ return translations[language][key] || translations.en[key] || key; }
+  function applyLanguage(next){
+    language = next === 'pl' ? 'pl' : 'en';
+    document.documentElement.lang = language;
+    Array.prototype.slice.call(document.querySelectorAll('[data-i18n]')).forEach(function(el){ el.textContent = translate(el.dataset.i18n); });
+    Array.prototype.slice.call(document.querySelectorAll('[data-i18n-aria]')).forEach(function(el){ el.setAttribute('aria-label', translate(el.dataset.i18nAria)); });
+    window.dispatchEvent(new CustomEvent('languagechange', { detail:{ language:language } }));
+  }
+  window.siteTranslate = translate;
+  var button = document.getElementById('languageBtn');
+  var menu = document.getElementById('languageMenu');
+  button.addEventListener('click', function(){ menu.hidden = !menu.hidden; button.setAttribute('aria-expanded', String(!menu.hidden)); });
+  Array.prototype.slice.call(menu.querySelectorAll('[data-language]')).forEach(function(option){ option.addEventListener('click', function(){ applyLanguage(option.dataset.language); menu.hidden = true; button.setAttribute('aria-expanded', 'false'); }); });
+  document.addEventListener('click', function(event){ if(!event.target.closest('.language-picker')){ menu.hidden = true; button.setAttribute('aria-expanded', 'false'); } });
+  var originalApplyLanguage = applyLanguage;
+  applyLanguage = function(next){ originalApplyLanguage(next); if(next==='pl') window.siteUnlockAchievement('language'); };
+  applyLanguage('en');
+})();
+</script>
+
+<script>
+(function(){
+  var themeSelect = document.getElementById('themeSelect');
+  var backgroundSelect = document.getElementById('backgroundSelect');
+  var particlesToggle = document.getElementById('particlesToggle');
+  var compactToggle = document.getElementById('compactToggle');
+  var fontRange = document.getElementById('fontRange');
+  var canvas = document.getElementById('bgCanvas');
+  var resetButton = document.getElementById('resetCustomizationBtn');
+  var resetMenu = document.getElementById('resetCustomizationMenu');
+  var resetCloseButton = document.getElementById('resetCustomizationClose');
+  var resetNoButton = document.getElementById('resetCustomizationNo');
+  var resetYesButton = document.getElementById('resetCustomizationYes');
+  var settingsKey = 'gelmix-siteos-settings';
+  var saved = {};
+  try{ saved = JSON.parse(localStorage.getItem(settingsKey) || '{}'); }catch(_){ }
+
+  function save(){
+    try{ localStorage.setItem(settingsKey, JSON.stringify({ theme:themeSelect.value, background:backgroundSelect.value, particles:particlesToggle.checked, compact:compactToggle.checked, fontSize:fontRange.value })); }catch(_){ }
+  }
+  function apply(){
+    if(themeSelect.value==='void') document.body.removeAttribute('data-theme');
+    else document.body.dataset.theme = themeSelect.value;
+    if(backgroundSelect.value==='void') document.body.removeAttribute('data-background');
+    else document.body.dataset.background = backgroundSelect.value;
+    canvas.style.visibility = particlesToggle.checked ? 'visible' : 'hidden';
+    document.body.classList.toggle('compact-mode', compactToggle.checked);
+    document.body.style.fontSize = fontRange.value + 'px';
+    save();
+  }
+  themeSelect.value = saved.theme || 'void';
+  backgroundSelect.value = saved.background || 'void';
+  particlesToggle.checked = saved.particles !== false;
+  compactToggle.checked = saved.compact === true;
+  fontRange.value = saved.fontSize || '15';
+  [themeSelect, backgroundSelect, particlesToggle, compactToggle, fontRange].forEach(function(control){ control.addEventListener('input', function(){ apply(); window.siteUnlockAchievement('customize'); }); control.addEventListener('change', function(){ apply(); window.siteUnlockAchievement('customize'); }); });
+  function closeResetMenu(){ resetMenu.hidden = true; }
+  resetButton.addEventListener('click', function(){ resetMenu.hidden = false; resetNoButton.focus(); });
+  resetCloseButton.addEventListener('click', closeResetMenu);
+  resetNoButton.addEventListener('click', closeResetMenu);
+  resetMenu.addEventListener('click', function(event){ if(event.target===resetMenu) closeResetMenu(); });
+  resetYesButton.addEventListener('click', function(){
+    themeSelect.value = 'void';
+    backgroundSelect.value = 'void';
+    particlesToggle.checked = true;
+    compactToggle.checked = false;
+    fontRange.value = '15';
+    apply();
+    window.siteUnlockAchievement('customize');
+    closeResetMenu();
+  });
+  document.addEventListener('keydown', function(event){ if(event.key==='Escape' && !resetMenu.hidden) closeResetMenu(); });
+  apply();
+})();
+
+(function(){
+  var achievementList = document.getElementById('achievementList');
+  var summary = document.getElementById('achievementSummary');
+  var moreButton = document.getElementById('achievementMore');
+  var achievementToast = document.getElementById('achievementToast');
+  var achievementToastTitle = document.getElementById('achievementToastTitle');
+  var achievementToastLabel = document.getElementById('achievementToastLabel');
+  var achievementToastTimer;
+  var clearButton = document.getElementById('clearAchievementsBtn');
+  var clearMenu = document.getElementById('clearAchievementsMenu');
+  var clearCloseButton = document.getElementById('clearAchievementsClose');
+  var clearNoButton = document.getElementById('clearAchievementsNo');
+  var clearYesButton = document.getElementById('clearAchievementsYes');
+  var achievementKey = 'gelmix-siteos-achievements';
+  var definitions = [
+    { id:'language', name:'achievementLanguage', detail:'achievementLanguageDetail' },
+    { id:'windows', name:'achievementWindows', detail:'achievementWindowsDetail' },
+    { id:'move', name:'achievementMove', detail:'achievementMoveDetail' },
+    { id:'win', name:'achievementWin', detail:'achievementWinDetail' },
+    { id:'customize', name:'achievementCustomize', detail:'achievementCustomizeDetail' },
+    { id:'custom', name:'achievementCustom', detail:'achievementCustomDetail' },
+    { id:'friends', name:'achievementFriends', detail:'achievementFriendsDetail' },
+    { id:'loseZach', name:'achievementLoseZach', detail:'achievementLoseZachDetail', secret:true }
+  ];
+  var unlocked = {};
+  var openedWindows = { identity:true, chess:true, log:true };
+  var expanded = false;
+  try{ unlocked = JSON.parse(localStorage.getItem(achievementKey) || '{}'); }catch(_){ }
+  function render(){
+    var count = definitions.filter(function(item){ return unlocked[item.id]; }).length;
+    summary.textContent = window.siteTranslate('unlocked').replace('{0}', count).replace('{1}', definitions.length);
+    achievementList.innerHTML = definitions.slice(0, expanded ? definitions.length : 2).map(function(item){
+      var name = item.secret && !unlocked[item.id] ? window.siteTranslate('achievementSecretName') : window.siteTranslate(item.name);
+      var detail = item.secret && !unlocked[item.id] ? window.siteTranslate('achievementSecretDetail') : window.siteTranslate(item.detail);
+      return '<div class="achievement '+(unlocked[item.id] ? 'is-unlocked' : '')+'"><span class="achievement__icon">'+(unlocked[item.id] ? '★' : '☆')+'</span><span><strong class="achievement__name">'+name+'</strong><small class="achievement__detail">'+detail+'</small></span></div>';
+    }).join('');
+    moreButton.hidden = definitions.length <= 2;
+    moreButton.textContent = window.siteTranslate(expanded ? 'showLess' : 'showMore');
+  }
+  moreButton.addEventListener('click', function(){ expanded = !expanded; render(); });
+  function closeClearMenu(){ clearMenu.hidden = true; }
+  clearButton.addEventListener('click', function(){ clearMenu.hidden = false; clearNoButton.focus(); });
+  clearCloseButton.addEventListener('click', closeClearMenu);
+  clearNoButton.addEventListener('click', closeClearMenu);
+  clearMenu.addEventListener('click', function(event){ if(event.target===clearMenu) closeClearMenu(); });
+  document.addEventListener('keydown', function(event){ if(event.key==='Escape' && !clearMenu.hidden) closeClearMenu(); });
+  clearYesButton.addEventListener('click', function(){
+    unlocked = {};
+    try{ localStorage.removeItem(achievementKey); }catch(_){ }
+    render();
+    closeClearMenu();
+  });
+  window.siteUnlockAchievement = function(id){
+    if(unlocked[id]) return;
+    unlocked[id] = true;
+    try{ localStorage.setItem(achievementKey, JSON.stringify(unlocked)); }catch(_){ }
+    render();
+    var item = definitions.filter(function(definition){ return definition.id===id; })[0];
+    if(item){
+      window.siteLogEvent('Achievement unlocked: ' + window.siteTranslate(item.name));
+      achievementToastTitle.textContent = window.siteTranslate(item.name);
+      achievementToastLabel.textContent = window.siteTranslate('unlockedLabel');
+      achievementToast.hidden = false;
+      clearTimeout(achievementToastTimer);
+      achievementToastTimer = setTimeout(function(){ achievementToast.hidden = true; }, 5000);
+    }
+  };
+  window.siteMarkWindowOpened = function(id){
+    openedWindows[id] = true;
+    if(['identity','chess','log','customization','achievements'].every(function(windowId){ return openedWindows[windowId]; })) window.siteUnlockAchievement('windows');
+  };
+  window.addEventListener('languagechange', function(){
+    render();
+    if(!achievementToast.hidden) achievementToastLabel.textContent = window.siteTranslate('unlockedLabel');
+  });
+  Array.prototype.slice.call(document.querySelectorAll('a[href]')).forEach(function(link){
+    link.addEventListener('click', function(){
+      var linkName = link.firstChild ? link.firstChild.textContent.trim() : link.textContent.trim();
+      var category = link.querySelector('small');
+      window.siteLogEvent('Link opened: ' + linkName + (category ? ' / ' + category.textContent.trim() : ''));
+    });
+  });
+  render();
+})();
+
 (function(){
   var canvas = document.getElementById('bgCanvas');
   var ctx = canvas.getContext('2d');
@@ -549,9 +894,14 @@
     '> Logs Displayed!',
     '> Checking for notifications...',
     '> No new notifications, as expected.',
-    '> _'
   ];
   var li = 0;
+  window.siteLogEvent = function(message){
+    var p = document.createElement('div');
+    p.textContent = '> ' + message;
+    el.appendChild(p);
+    el.scrollTop = el.scrollHeight;
+  };
   function addLine(){
     if(li >= lines.length) return;
     var p = document.createElement('div');
@@ -699,7 +1049,7 @@
     if(maxed){
       maxed.classList.remove('window--maximized');
       var mb = maxed.querySelector('[data-action="maximize"]');
-      if(mb) mb.setAttribute('aria-label', 'Maximize window');
+      if(mb) mb.setAttribute('aria-label', window.siteTranslate('maximizeWindow'));
     }
   });
 
@@ -791,7 +1141,7 @@
         void win.offsetHeight;
         win.classList.toggle('window--maximized');
         var maximized = win.classList.contains('window--maximized');
-        maxBtn.setAttribute('aria-label', maximized ? 'Restore window' : 'Maximize window');
+        maxBtn.setAttribute('aria-label', maximized ? window.siteTranslate('restoreWindow') : window.siteTranslate('maximizeWindow'));
         bringToFront(win);
         requestAnimationFrame(function(){
           win.classList.remove('window--anim-maximize');
@@ -814,6 +1164,7 @@
       animateShow(win);
       bringToFront(win);
       setTaskbarState(btn.dataset.window, true);
+      window.siteMarkWindowOpened(btn.dataset.window);
       win.scrollIntoView({
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
         block:'center'
@@ -1114,7 +1465,8 @@
   var PIECE_VALUES = {P:100,N:320,B:330,R:500,Q:900,K:0};
   var HARD_SEARCH_DEPTH = 3;
   var ZACH_SEARCH_DEPTH = 3;
-  var EXTREME_SEARCH_DEPTH = 6;
+  var EXTREME_SEARCH_DEPTH = 4;
+  var customSearchDepth = 3;
 
   function positionalValue(type, r, c, color){
     var center = 3.5 - Math.max(Math.abs(c-3.5), Math.abs(r-3.5));
@@ -1191,7 +1543,8 @@
     var scoredMoves = [];
     var alpha=-Infinity, beta=Infinity;
     for(var i=0;i<moves.length;i++){
-      var val = minimax(simulateState(state,moves[i]), HARD_SEARCH_DEPTH-1, alpha, beta);
+      var searchDepth = difficulty==='custom' ? customSearchDepth : HARD_SEARCH_DEPTH;
+      var val = minimax(simulateState(state,moves[i]), searchDepth-1, alpha, beta);
       scoredMoves.push({ move:moves[i], value:val });
       if(val<beta) beta=val;
     }
@@ -1237,14 +1590,21 @@
   var difficultyBtn = document.getElementById('chessDifficulty');
   var newBtn = document.getElementById('chessNewBtn');
   var undoBtn = document.getElementById('chessUndoBtn');
+  var movesBtn = document.getElementById('chessMovesBtn');
+  var moveHistoryEl = document.getElementById('moveHistory');
   var botMenu = document.getElementById('botMenu');
   var botMenuCloseBtn = document.getElementById('botMenuClose');
   var botOptions = Array.prototype.slice.call(document.querySelectorAll('#botMenu .bot-menu__option'));
+  var customDepthMenu = document.getElementById('customDepthMenu');
+  var customDepthForm = document.getElementById('customDepthForm');
+  var customDepthInput = document.getElementById('customDepthInput');
+  var customDepthCloseBtn = document.getElementById('customDepthClose');
+  var customDepthCancelBtn = document.getElementById('customDepthCancel');
   var promotionMenu = document.getElementById('promotionMenu');
   var promotionMenuCloseBtn = document.getElementById('promotionMenuClose');
   var promotionOptions = Array.prototype.slice.call(document.querySelectorAll('[data-promotion]'));
 
-  var chessState, stateHistory, selected, legalTargets, gameOver, aiThinking, difficulty, animatedMove, pendingPromotion;
+  var chessState, stateHistory, moveHistory, selected, legalTargets, gameOver, aiThinking, difficulty, animatedMove, lastMove, pendingPromotion;
 
   function syncBotMenu(){
     botOptions.forEach(function(option){
@@ -1252,16 +1612,43 @@
     });
   }
 
+  function updateBotLabel(){
+    botLabel.textContent = difficulty==='custom' ? window.siteTranslate('customMode').replace('{0}', customSearchDepth) : window.siteTranslate('mode').replace('{0}', difficulty.toUpperCase());
+  }
+
+  function renderMoveHistory(){
+    moveHistoryEl.innerHTML = moveHistory.map(function(move, index){
+      var moveNumber = Math.floor(index/2) + 1;
+      var column = index%2===0 ? 1 : 2;
+      return '<span class="move-history__number">'+(column===1 ? moveNumber+'.' : '')+'</span><span>'+ (column===1 ? squareName(move.from.r, move.from.c)+'-'+squareName(move.to.r, move.to.c) : '') +'</span><span>'+ (column===2 ? squareName(move.from.r, move.from.c)+'-'+squareName(move.to.r, move.to.c) : '') +'</span>';
+    }).join('');
+  }
+
   function closeBotMenu(){
     botMenu.hidden = true;
     difficultyBtn.setAttribute('aria-expanded', 'false');
   }
+
+  movesBtn.addEventListener('click', function(){
+    moveHistoryEl.hidden = !moveHistoryEl.hidden;
+    movesBtn.setAttribute('aria-expanded', String(!moveHistoryEl.hidden));
+    movesBtn.textContent = window.siteTranslate(moveHistoryEl.hidden ? 'showMoves' : 'hideMoves');
+  });
 
   function openBotMenu(){
     syncBotMenu();
     botMenu.hidden = false;
     difficultyBtn.setAttribute('aria-expanded', 'true');
     botOptions.filter(function(option){ return option.dataset.bot===difficulty; })[0].focus();
+  }
+
+  function closeCustomDepthMenu(){ customDepthMenu.hidden = true; }
+
+  function openCustomDepthMenu(){
+    customDepthInput.value = customSearchDepth;
+    customDepthMenu.hidden = false;
+    customDepthInput.focus();
+    customDepthInput.select();
   }
 
   difficultyBtn.addEventListener('click', openBotMenu);
@@ -1271,16 +1658,39 @@
   });
   botOptions.forEach(function(option){
     option.addEventListener('click', function(){
+      if(option.dataset.bot==='custom'){
+        closeBotMenu();
+        openCustomDepthMenu();
+        return;
+      }
       difficulty = option.dataset.bot;
-      botLabel.textContent = 'MODE: ' + difficulty.toUpperCase();
+      if(difficulty==='1v1') window.siteUnlockAchievement('friends');
+      updateBotLabel();
       if(difficulty==='1v1') updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
       syncBotMenu();
       closeBotMenu();
     });
   });
+  customDepthCloseBtn.addEventListener('click', closeCustomDepthMenu);
+  customDepthCancelBtn.addEventListener('click', closeCustomDepthMenu);
+  customDepthMenu.addEventListener('click', function(event){
+    if(event.target===customDepthMenu) closeCustomDepthMenu();
+  });
+  customDepthForm.addEventListener('submit', function(event){
+    event.preventDefault();
+    var enteredDepth = Number(customDepthInput.value);
+    if(!Number.isInteger(enteredDepth)) return;
+    customSearchDepth = Math.max(1, Math.min(8, enteredDepth));
+    difficulty = 'custom';
+    window.siteUnlockAchievement('custom');
+    updateBotLabel();
+    syncBotMenu();
+    closeCustomDepthMenu();
+  });
   document.addEventListener('keydown', function(event){
     if(event.key!=='Escape') return;
     if(!botMenu.hidden) closeBotMenu();
+    else if(!customDepthMenu.hidden) closeCustomDepthMenu();
     else if(!promotionMenu.hidden) closePromotionMenu();
   });
 
@@ -1349,6 +1759,8 @@
           sq.classList.add(pieceColor(piece)==='w' ? 'chess-sq--whitePiece' : 'chess-sq--blackPiece');
         }
         if(selected && selected.r===r && selected.c===c) sq.classList.add('chess-sq--selected');
+        if(lastMove && lastMove.from.r===r && lastMove.from.c===c) sq.classList.add('chess-sq--last-from');
+        if(lastMove && lastMove.to.r===r && lastMove.to.c===c) sq.classList.add('chess-sq--last-to');
         if(legalTargets.some(function(m){ return m.to.r===r && m.to.c===c; })){
           sq.classList.add(piece ? 'chess-sq--capture' : 'chess-sq--legal');
         }
@@ -1363,7 +1775,7 @@
   }
 
   function updateHud(){
-    turnEl.textContent = gameOver ? 'GAME OVER' : (chessState.turn==='w' ? 'WHITE TO MOVE' : 'BLACK TO MOVE');
+    turnEl.textContent = gameOver ? window.siteTranslate('gameOver') : (chessState.turn==='w' ? window.siteTranslate('whiteMove') : window.siteTranslate('blackMove'));
     capWhiteEl.textContent = chessState.captured.b.map(function(p){ return UNICODE[p]; }).join(' ');
     capBlackEl.textContent = chessState.captured.w.map(function(p){ return UNICODE[p]; }).join(' ');
   }
@@ -1371,11 +1783,18 @@
   function commitMove(move){
     stateHistory.push(cloneState(chessState));
     playMove(chessState, move);
+    window.siteUnlockAchievement('move');
+    moveHistory.push({ from:{r:move.from.r,c:move.from.c}, to:{r:move.to.r,c:move.to.c} });
+    renderMoveHistory();
+    lastMove = move;
     animatedMove = move;
   }
 
   function finishGame(result){
     gameOver = true;
+    if(result.indexOf('WHITE WINS')===0) window.siteUnlockAchievement('win');
+    if(difficulty==='zach' && result.indexOf('BLACK WINS')===0) window.siteUnlockAchievement('loseZach');
+    window.siteLogEvent(result.indexOf('WHITE WINS')===0 ? 'Victory: '+result : (result.indexOf('BLACK WINS')===0 ? 'Defeat: '+result : 'Draw: '+result));
     msgEl.textContent = result;
     selected = null; legalTargets = [];
     renderBoard();
@@ -1383,7 +1802,7 @@
   }
 
   function updateTwoPlayerMessage(inCheck){
-    msgEl.textContent = inCheck ? 'CHECK — ' + (chessState.turn==='w' ? 'WHITE' : 'BLACK') + ' TO MOVE' : (chessState.turn==='w' ? 'WHITE' : 'BLACK') + ' TO MOVE';
+    msgEl.textContent = inCheck ? (chessState.turn==='w' ? window.siteTranslate('checkWhite') : window.siteTranslate('checkBlack')) : (chessState.turn==='w' ? window.siteTranslate('whiteMove') : window.siteTranslate('blackMove'));
   }
 
   function afterHumanMove(){
@@ -1394,7 +1813,7 @@
       updateTwoPlayerMessage(end.inCheck);
       return;
     }
-    msgEl.textContent = end.inCheck ? 'CHECK — BLACK IS THINKING...' : 'BLACK IS THINKING...';
+    msgEl.textContent = end.inCheck ? window.siteTranslate('checkThinking') : window.siteTranslate('thinking');
     aiThinking = true;
     setTimeout(function(){
       if(difficulty==='1v1'){
@@ -1406,14 +1825,17 @@
       if(aiMove){
         stateHistory.push(cloneState(chessState));
         playMove(chessState, aiMove);
+        lastMove = aiMove;
+        moveHistory.push({ from:{r:aiMove.from.r,c:aiMove.from.c}, to:{r:aiMove.to.r,c:aiMove.to.c} });
         animatedMove = aiMove;
       }
+      renderMoveHistory();
       aiThinking = false;
       renderBoard();
       updateHud();
       var end2 = checkGameEnd(chessState);
       if(end2.over){ finishGame(end2.result); }
-      else { msgEl.textContent = end2.inCheck ? 'CHECK — YOUR MOVE' : 'YOUR MOVE — WHITE'; }
+      else { msgEl.textContent = end2.inCheck ? window.siteTranslate('checkYourMove') : window.siteTranslate('yourMoveWhite'); }
     }, 350);
   }
 
@@ -1450,14 +1872,25 @@
     stateHistory = [];
     selected = null; legalTargets = [];
     gameOver = false; aiThinking = false;
-    msgEl.textContent = 'YOUR MOVE — WHITE';
+    lastMove = null;
+    moveHistory = [];
+    renderMoveHistory();
+    msgEl.textContent = window.siteTranslate('yourMoveWhite');
     renderBoard();
     updateHud();
   }
 
   difficulty = 'hard';
-  botLabel.textContent = 'MODE: ' + difficulty.toUpperCase();
+  updateBotLabel();
   syncBotMenu();
+  window.addEventListener('languagechange', function(){
+    updateBotLabel();
+    if(gameOver) updateHud();
+    else if(difficulty==='1v1') updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
+    else msgEl.textContent = window.siteTranslate('yourMoveWhite');
+    movesBtn.textContent = window.siteTranslate(moveHistoryEl.hidden ? 'showMoves' : 'hideMoves');
+    updateHud();
+  });
 
   newBtn.addEventListener('click', newGame);
   undoBtn.addEventListener('click', function(){
@@ -1465,14 +1898,17 @@
     if(stateHistory.length>=2){
       stateHistory.pop();
       chessState = stateHistory.pop();
+      moveHistory.splice(-2);
     } else if(stateHistory.length===1){
       chessState = stateHistory.pop();
+      moveHistory.pop();
     } else {
       return;
     }
     selected = null; legalTargets = []; gameOver = false;
     if(difficulty==='1v1') updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
-    else msgEl.textContent = 'YOUR MOVE — WHITE';
+    else msgEl.textContent = window.siteTranslate('yourMoveWhite');
+    renderMoveHistory();
     renderBoard();
     updateHud();
   });
