@@ -205,11 +205,21 @@
   .chess__capturedRow small{ font-size:.6rem; color:var(--ink-dim); letter-spacing:.05em; width:6em; flex:none; text-transform:uppercase; }
   .game__msg{ min-height:1.2em; font-size:.72rem; color:var(--ink-dim); letter-spacing:.04em; text-align:center; }
   .game__controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .draw-controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .draw-controls[hidden]{ display:none; }
   .move-history{ width:100%; max-height:180px; overflow-y:auto; padding:8px; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink-dim); font-size:.72rem; }
   .move-history[hidden]{ display:none; }
   .move-history__row{ display:grid; grid-template-columns:2.5em 1fr 1fr; gap:8px; padding:3px 0; border-bottom:1px solid rgba(70,58,107,.45); }
   .move-history__row:last-child{ border-bottom:0; }
   .move-history__number{ color:var(--glow); }
+
+  .discord-status{ display:flex; align-items:center; gap:8px; font-size:.85rem; margin-top:4px; }
+  .discord-status__indicator{ display:inline-block; width:8px; height:8px; border-radius:50%; animation:none; }
+  .discord-status__indicator.online{ background:#43b581; box-shadow:0 0 6px rgba(67,181,129,.6); }
+  .discord-status__indicator.idle{ background:#faa61a; box-shadow:0 0 6px rgba(250,166,26,.6); }
+  .discord-status__indicator.dnd{ background:#f04747; box-shadow:0 0 6px rgba(240,71,71,.6); }
+  .discord-status__indicator.offline{ background:#747f8d; box-shadow:0 0 6px rgba(116,127,141,.6); }
+  .discord-status__text{ color:var(--ink-dim); letter-spacing:.04em; }
   .settings-list{ display:grid; gap:12px; }
   .settings-row{ display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px; padding:10px; background:var(--panel-alt); border:1px solid var(--chrome); }
   .settings-row label{ color:var(--ink-dim); font-size:.78rem; }
@@ -240,6 +250,9 @@
   .taskbar__btn{ font-family:var(--font-body); font-size:.65rem; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; padding:5px 9px; background:transparent; border:1px solid var(--chrome); color:var(--ink-dim); border-radius:2px; cursor:pointer; box-shadow:2px 2px 0 0 var(--shadow); transition:transform .06s ease, box-shadow .06s ease; }
   .taskbar__btn:active{ transform:translate(2px,2px); box-shadow:none; }
   .taskbar__btn.is-open{ color:var(--signal); border-color:var(--signal); }
+  .taskbar.taskbar--icons .taskbar__brand{ display:none; }
+  .taskbar.taskbar--icons .taskbar__windows .taskbar__btn, .taskbar.taskbar--icons #languageBtn{ width:34px; min-width:34px; height:32px; padding:4px; font-size:0; display:grid; place-items:center; }
+  .taskbar.taskbar--icons .taskbar__windows .taskbar__btn::before, .taskbar.taskbar--icons #languageBtn::before{ content:attr(data-icon); font-family:var(--font-display); font-size:1.15rem; line-height:1; }
   .taskbar__right{ display:flex; align-items:center; gap:10px; }
   .language-picker{ position:relative; }
   .language-menu{ position:absolute; right:0; bottom:calc(100% + 8px); display:grid; gap:4px; min-width:110px; padding:5px; background:var(--panel); border:1px solid var(--chrome); box-shadow:4px 4px 0 var(--shadow); }
@@ -266,6 +279,20 @@
   .custom-depth-form label{ color:var(--ink-dim); font-size:.78rem; }
   .custom-depth-form input{ width:100%; padding:8px 10px; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink); font:inherit; }
   .custom-depth-form__actions{ display:flex; justify-content:flex-end; gap:8px; }
+  .notes-area{ width:100%; min-height:220px; resize:vertical; padding:10px; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink); font:inherit; line-height:1.45; }
+  .tool-meta{ display:flex; justify-content:space-between; gap:10px; color:var(--ink-dim); font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; }
+  .timer-display{ font-family:var(--font-display); font-size:4.8rem; line-height:1; text-align:center; color:var(--signal); text-shadow:0 0 14px rgba(77,255,176,.25); }
+  .timer-display.is-done{ color:var(--alert); }
+  .timer-presets{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+  .calendar-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .calendar-month{ margin:0; font-family:var(--font-display); font-size:1.5rem; color:var(--signal); }
+  .calendar-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .calendar-weekday{ color:var(--ink-dim); font-size:.62rem; text-align:center; text-transform:uppercase; }
+  .calendar-day{ min-height:34px; padding:5px 2px; background:var(--panel-alt); border:1px solid transparent; color:var(--ink); font:inherit; font-size:.72rem; cursor:pointer; }
+  .calendar-day:hover, .calendar-day.is-selected{ border-color:var(--glow); color:var(--glow); }
+  .calendar-day.is-today{ border-color:var(--signal); color:var(--signal); font-weight:600; }
+  .calendar-day.is-empty{ visibility:hidden; pointer-events:none; }
+  .calendar-note{ width:100%; min-height:64px; resize:vertical; padding:8px; background:var(--panel-alt); border:1px solid var(--chrome); color:var(--ink); font:inherit; font-size:.75rem; }
 
   @media (max-width:920px){
     .window{ position:static !important; left:auto !important; top:auto !important; width:100% !important; height:auto !important; margin:0 0 16px; }
@@ -275,6 +302,16 @@
     .desktop{ min-height:0; padding:12px 12px 88px; }
     .bot-menu{ padding:12px; }
     .bot-menu__options{ grid-template-columns:1fr; }
+  }
+  @media (max-width:600px){
+    .taskbar{ gap:5px; padding:7px 8px; }
+    .taskbar__brand{ display:none; }
+    .taskbar__windows{ gap:4px; }
+    .taskbar__btn{ width:34px; min-width:34px; height:32px; padding:4px; font-size:0; display:grid; place-items:center; }
+    .taskbar__btn::before{ content:attr(data-icon); font-family:var(--font-display); font-size:1.15rem; line-height:1; }
+    .taskbar__right{ gap:5px; }
+    .language-picker .taskbar__btn{ width:34px; }
+    .taskbar__clock{ min-width:2.8em; font-size:.65rem; }
   }
   @media (min-width:921px){
     .desktop{ padding-left:12px; }
@@ -384,6 +421,10 @@
       <p class="prompt">Gelmix@root: sudo whois</p>
       <h1 class="name">Gelmix</h1>
       <p class="tagline" data-i18n="tagline">I like to play some games, such as minecraft and chess!</p>
+      <p class="discord-status" id="discordStatus">
+        <span class="discord-status__indicator offline"></span>
+        <span class="discord-status__text">DISCORD: LOADING...</span>
+      </p>
       <div class="section-label" data-i18n="links">Links</div>
       <ul class="links">
         <li><a href="https://github.com/galaxy51772" target="_blank" rel="noopener">GITHUB<small data-i18n="code">code</small></a></li>
@@ -427,6 +468,11 @@
           <button class="win-action" id="chessNewBtn" type="button" data-i18n="newGame">NEW GAME</button>
           <button class="win-action" id="chessUndoBtn" type="button" data-i18n="undo">UNDO</button>
           <button class="win-action" id="chessMovesBtn" type="button" data-i18n="showMoves" aria-expanded="false">SHOW MOVES</button>
+        </div>
+        <div class="draw-controls" id="drawControls" hidden>
+          <button class="win-action" id="drawBtn" type="button" data-i18n="draw">DRAW</button>
+          <button class="win-action" id="acceptDrawBtn" type="button" data-i18n="acceptDraw">ACCEPT DRAW</button>
+          <button class="win-action" id="refuseDrawBtn" type="button" data-i18n="refuseDraw">REFUSE DRAW</button>
         </div>
       </div>
     </div>
@@ -496,20 +542,63 @@
     <div class="win-resize" data-resize-handle aria-hidden="true"></div>
   </section>
 
+  <section class="window window--closed" data-window="notes" style="--x:850px; --y:40px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">✎</span><span class="window__title">NOTES.EXE</span><span class="window__path">SCRATCHPAD</span>
+      <div class="window__controls"><button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button><button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button><button class="win-btn" data-action="close" aria-label="Close window">×</button></div>
+    </header>
+    <div class="window__body">
+      <textarea class="notes-area" id="notesArea" aria-label="Scratchpad notes" placeholder="Type something worth remembering..."></textarea>
+      <div class="tool-meta"><span id="notesStatus">LOCAL STORAGE READY</span><span id="notesCount">0 chars</span></div>
+      <button class="win-action" id="clearNotesBtn" type="button">CLEAR NOTES</button>
+    </div>
+    <footer class="window__status">AUTOSAVE · LOCAL ONLY</footer><div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+  <section class="window window--closed" data-window="focus" style="--x:850px; --y:330px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">◷</span><span class="window__title">FOCUS.EXE</span><span class="window__path">POMODORO</span>
+      <div class="window__controls"><button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button><button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button><button class="win-btn" data-action="close" aria-label="Close window">×</button></div>
+    </header>
+    <div class="window__body">
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div class="timer-presets"><button class="win-action" data-minutes="5" type="button">5 MIN</button><button class="win-action" data-minutes="25" type="button">25 MIN</button><button class="win-action" data-minutes="50" type="button">50 MIN</button></div>
+      <div class="game__controls"><button class="win-action" id="timerStartBtn" type="button">START</button><button class="win-action" id="timerResetBtn" type="button">RESET</button></div>
+    </div>
+    <footer class="window__status" id="timerStatus">READY · CHOOSE A SESSION</footer><div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
+  <section class="window window--closed" data-window="calendar" style="--x:520px; --y:330px;">
+    <header class="window__bar" data-drag-handle>
+      <span class="window__icon">▦</span><span class="window__title">CALENDAR.EXE</span><span class="window__path">PLANNER</span>
+      <div class="window__controls"><button class="win-btn" data-action="minimize" aria-label="Minimize window">–</button><button class="win-btn" data-action="maximize" aria-label="Maximize window">□</button><button class="win-btn" data-action="close" aria-label="Close window">×</button></div>
+    </header>
+    <div class="window__body">
+      <div class="calendar-head"><button class="win-action" id="calendarPrev" type="button" aria-label="Previous month">&lt;</button><h2 class="calendar-month" id="calendarMonth"></h2><button class="win-action" id="calendarNext" type="button" aria-label="Next month">&gt;</button></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="tool-meta"><span id="calendarSelected">SELECT A DAY</span><span>LOCAL NOTES</span></div>
+      <textarea class="calendar-note" id="calendarNote" aria-label="Calendar note" placeholder="Add a note for this day..."></textarea>
+    </div>
+    <footer class="window__status">MONTH VIEW · LOCAL ONLY</footer><div class="win-resize" data-resize-handle aria-hidden="true"></div>
+  </section>
+
 </main>
 
 <div class="taskbar">
   <div class="taskbar__brand">Gelmix siteOS</div>
   <div class="taskbar__windows">
-    <button class="taskbar__btn is-open" data-window="identity" data-i18n="identity">Identity</button>
-    <button class="taskbar__btn is-open" data-window="chess" data-i18n="chess">Chess</button>
-    <button class="taskbar__btn is-open" data-window="log" data-i18n="log">Log</button>
-    <button class="taskbar__btn" data-window="customization" data-i18n="customization">Customize</button>
-    <button class="taskbar__btn" data-window="achievements" data-i18n="achievements">Achievements</button>
+    <button class="taskbar__btn is-open" data-window="identity" data-icon="◆" data-i18n="identity" title="Identity">Identity</button>
+    <button class="taskbar__btn is-open" data-window="chess" data-icon="♞" data-i18n="chess" title="Chess">Chess</button>
+    <button class="taskbar__btn is-open" data-window="log" data-icon="&gt;_" data-i18n="log" title="Log">Log</button>
+    <button class="taskbar__btn" data-window="customization" data-icon="✦" data-i18n="customization" title="Customize">Customize</button>
+    <button class="taskbar__btn" data-window="achievements" data-icon="★" data-i18n="achievements" title="Achievements">Achievements</button>
+    <button class="taskbar__btn" data-window="notes" data-icon="✎" title="Notes">Notes</button>
+    <button class="taskbar__btn" data-window="focus" data-icon="◷" title="Focus">Focus</button>
+    <button class="taskbar__btn" data-window="calendar" data-icon="▦" title="Calendar">Calendar</button>
   </div>
   <div class="taskbar__right">
     <div class="language-picker">
-      <button class="taskbar__btn" id="languageBtn" type="button" aria-haspopup="menu" aria-expanded="false" data-i18n="language">Language</button>
+      <button class="taskbar__btn" id="languageBtn" type="button" aria-haspopup="menu" aria-expanded="false" data-icon="文" data-i18n="language" title="Language">Language</button>
       <div class="language-menu" id="languageMenu" role="menu" hidden>
         <button class="taskbar__btn" type="button" data-language="en" role="menuitem">English</button>
         <button class="taskbar__btn" type="button" data-language="pl" role="menuitem">Polski</button>
@@ -541,6 +630,23 @@
   <small class="achievement-toast__label" id="achievementToastLabel">Unlocked!</small>
 </div>
 
+<div class="bot-menu" id="acceptDrawMenu" role="dialog" aria-modal="true" aria-labelledby="acceptDrawTitle" hidden>
+  <div class="bot-menu__panel">
+    <div class="bot-menu__bar">
+      <span class="window__icon">!</span>
+      <span class="bot-menu__title" id="acceptDrawTitle" data-i18n="acceptDraw">ACCEPT DRAW</span>
+      <button class="win-btn bot-menu__close" id="acceptDrawClose" type="button" data-i18n-aria="cancelDraw" aria-label="Cancel accepting draw">×</button>
+    </div>
+    <div class="bot-menu__body">
+      <p class="bot-menu__prompt" data-i18n="areYouSure">ARE YOU SURE?</p>
+      <div class="game__controls">
+        <button class="win-action" id="acceptDrawNo" type="button" data-i18n="no">NO</button>
+        <button class="win-action" id="acceptDrawYes" type="button" data-i18n="yes">YES</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="bot-menu" id="resetCustomizationMenu" role="dialog" aria-modal="true" aria-labelledby="resetCustomizationTitle" hidden>
   <div class="bot-menu__panel">
     <div class="bot-menu__bar">
@@ -568,8 +674,8 @@
       minimizeWindow:'Minimize window', maximizeWindow:'Maximize window', restoreWindow:'Restore window', closeWindow:'Close window', cancelPromotion:'Cancel promotion', closeBotMenu:'Close bot menu',
       tagline:'I like to play some games, such as minecraft and chess!', statusOnline:'STATUS: ONLINE', links:'Links', code:'code', mcProjects:'My MC projects', mainChannel:'Main channel', cuteBuffChannel:'Cute Buff channel', readyLinks:'READY · 4 LINKS',
       identityTitle:'IDENTITY.EXE', userProfile:'USER PROFILE', chessTitle:'CHESS.EXE', programsGames:'PROGRAMS / GAMES', terminalTitle:'TERMINAL.LOG', system:'SYSTEM', menu:'MENU', whiteTook:'White took', blackTook:'Black took', newGame:'NEW GAME', undo:'UNDO', clickPiece:'CLICK A PIECE, THEN A SQUARE', liveReadOnly:'LIVE · READ ONLY', language:'Language', identity:'Identity', chess:'Chess', log:'Log', customization:'Customize', achievements:'Achievements', customizationTitle:'CUSTOMIZE.EXE', settings:'SETTINGS', theme:'Theme', themeVoid:'Void', themeAmber:'Amber', themeIce:'Ice', themeForest:'Forest', themeRose:'Rose', background:'Background', backgroundVoid:'Void', backgroundGrid:'Grid', backgroundSunset:'Sunset', particles:'Particle backdrop', compact:'Compact windows', textSize:'Text size', settingsSaved:'SETTINGS SAVED LOCALLY', achievementsTitle:'ACHIEVEMENTS.EXE', progress:'PROGRESS', achievementsFooter:'UNLOCKS ARE SAVED LOCALLY', unlocked:'{0}/{1} UNLOCKED',
-      achievementLanguage:'Polyglot', achievementLanguageDetail:'Switch the interface language.', achievementWindows:'Window Shopper', achievementWindowsDetail:'Open every desktop window.', achievementMove:'First Move', achievementMoveDetail:'Play your first chess move.', achievementWin:'Checkmate', achievementWinDetail:'Win a chess game.', achievementCustomize:'Customize', achievementCustomizeDetail:'Change background and theme!', achievementCustom:'Custom?!', achievementCustomDetail:'Wow! You played witch custom!', achievementFriends:'Friends', achievementFriendsDetail:'Thanks for inviting your friend to 1v1 you!', achievementSecretName:'???', achievementSecretDetail:'Bot, loose', achievementLoseZach:'Loose to Zach', achievementLoseZachDetail:'Wow! You loosed witch Zach!', unlockedLabel:'Unlocked!', showMore:'SHOW MORE', showLess:'SHOW LESS', showMoves:'SHOW MOVES', hideMoves:'HIDE MOVES', clearAchievements:'CLEAR ACHIEVEMENTS', areYouSure:'ARE YOU SURE?', yes:'YES', no:'NO', cancelClear:'Cancel clearing achievements', resetCustomization:'RESET TO DEFAULT', resetAreYouSure:'RESET CUSTOMIZATION TO DEFAULT?', cancelReset:'Cancel resetting customization', chessMove:'Chess move', victory:'Victory', defeat:'Defeat', draw:'Draw', linkOpened:'Link opened',
-      mode:'MODE: {0}', customMode:'MODE: CUSTOM (DEPTH {0})', gameOver:'GAME OVER', whiteMove:'WHITE TO MOVE', blackMove:'BLACK TO MOVE', yourMoveWhite:'YOUR MOVE — WHITE', checkWhite:'CHECK — WHITE TO MOVE', checkBlack:'CHECK — BLACK TO MOVE', checkThinking:'CHECK — BLACK IS THINKING...', thinking:'BLACK IS THINKING...', checkYourMove:'CHECK — YOUR MOVE'
+      achievementLanguage:'Polyglot', achievementLanguageDetail:'Switch the interface language.', achievementWindows:'Window Shopper', achievementWindowsDetail:'Open every desktop window.', achievementMove:'First Move', achievementMoveDetail:'Play your first chess move.', achievementWin:'Checkmate', achievementWinDetail:'Win a chess game.', achievementCustomize:'Customize', achievementCustomizeDetail:'Change background and theme!', achievementCustom:'Custom?!', achievementCustomDetail:'Wow! You played witch custom!', achievementFriends:'Friends', achievementFriendsDetail:'Thanks for inviting your friend to 1v1 you!', achievementForeverFriend:'Forever friend', achievementForeverFriendDetail:'Maybe you founded your forever friend?', achievementNote:'Note Taker', achievementNoteDetail:'Write something in the local scratchpad.', achievementFocus:'Timekeeper', achievementFocusDetail:'Complete a focus session.', achievementShortcut:'Quick Switch', achievementShortcutDetail:'Use a keyboard shortcut to open a window.', achievementCalendar:'Calendar Keeper', achievementCalendarDetail:'Open the calendar and plan a day.', achievementSecretName:'???', achievementSecretDetail:'Bot, loose', achievementLoseZach:'Loose to Zach', achievementLoseZachDetail:'Wow! You loosed witch Zach!', unlockedLabel:'Unlocked!', showMore:'SHOW MORE', showLess:'SHOW LESS', showMoves:'SHOW MOVES', hideMoves:'HIDE MOVES', clearAchievements:'CLEAR ACHIEVEMENTS', areYouSure:'ARE YOU SURE?', yes:'YES', no:'NO', cancelClear:'Cancel clearing achievements', resetCustomization:'RESET TO DEFAULT', resetAreYouSure:'RESET CUSTOMIZATION TO DEFAULT?', cancelReset:'Cancel resetting customization', cancelDraw:'Cancel accepting draw', acceptDraw:'ACCEPT DRAW', refuseDraw:'REFUSE DRAW', chessMove:'Chess move', victory:'Victory', defeat:'Defeat', draw:'Draw', linkOpened:'Link opened',
+      mode:'MODE: {0}', customMode:'MODE: CUSTOM (DEPTH {0})', gameOver:'GAME OVER', whiteMove:'WHITE TO MOVE', blackMove:'BLACK TO MOVE', yourMoveWhite:'YOUR MOVE — WHITE', checkWhite:'CHECK — WHITE TO MOVE', checkBlack:'CHECK — BLACK TO MOVE', checkThinking:'CHECK — BLACK IS THINKING...', thinking:'BLACK IS THINKING...', checkYourMove:'CHECK — YOUR MOVE', drawOffered:'DRAW OFFERED'
     },
     pl: {
       bootSkip:'naciśnij dowolny klawisz lub dotknij, aby pominąć', selectMode:'WYBIERZ TRYB', selectOpponent:'CHESS.EXE / WYBIERZ PRZECIWNIKA LUB TRYB 1V1',
@@ -578,8 +684,8 @@
       minimizeWindow:'Minimalizuj okno', maximizeWindow:'Maksymalizuj okno', restoreWindow:'Przywróć okno', closeWindow:'Zamknij okno', cancelPromotion:'Anuluj promocję', closeBotMenu:'Zamknij menu bota',
       tagline:'Lubię grać w różne gry, takie jak Minecraft i szachy!', statusOnline:'STATUS: ONLINE', links:'Odnośniki', code:'kod', mcProjects:'Moje projekty MC', mainChannel:'Główny kanał', cuteBuffChannel:'Kanał Cute Buff', readyLinks:'GOTOWE · 4 ODNOŚNIKI',
       identityTitle:'IDENTITY.EXE', userProfile:'PROFIL UŻYTKOWNIKA', chessTitle:'CHESS.EXE', programsGames:'PROGRAMY / GRY', terminalTitle:'TERMINAL.LOG', system:'SYSTEM', menu:'MENU', whiteTook:'Białe zbiły', blackTook:'Czarne zbiły', newGame:'NOWA GRA', undo:'COFNIJ', clickPiece:'KLIKNIJ FIGURĘ, NASTĘPNIE POLE', liveReadOnly:'NA ŻYWO · TYLKO ODCZYT', language:'Język', identity:'Tożsamość', chess:'Szachy', log:'Dziennik', customization:'Dostosuj', achievements:'Osiągnięcia', customizationTitle:'DOSTOSUJ.EXE', settings:'USTAWIENIA', theme:'Motyw', themeVoid:'Pustka', themeAmber:'Bursztyn', themeIce:'Lód', themeForest:'Las', themeRose:'Różany', background:'Tło', backgroundVoid:'Pustka', backgroundGrid:'Siatka', backgroundSunset:'Zachód słońca', particles:'Tło z cząsteczkami', compact:'Kompaktowe okna', textSize:'Rozmiar tekstu', settingsSaved:'USTAWIENIA ZAPISANE LOKALNIE', achievementsTitle:'OSIĄGNIĘCIA.EXE', progress:'POSTĘP', achievementsFooter:'ODBLOKOWANIA ZAPISANE LOKALNIE', unlocked:'{0}/{1} ODBLOKOWANE',
-      achievementLanguage:'Poliglota', achievementLanguageDetail:'Zmień język interfejsu.', achievementWindows:'Łowca okien', achievementWindowsDetail:'Otwórz każde okno pulpitu.', achievementMove:'Pierwszy ruch', achievementMoveDetail:'Wykonaj pierwszy ruch szachowy.', achievementWin:'Mat', achievementWinDetail:'Wygraj partię szachów.', achievementCustomize:'Dostosuj', achievementCustomizeDetail:'Zmień tło i motyw!', achievementCustom:'Niestandardowy?!', achievementCustomDetail:'Wow! Grasz niestandardowym botem!', achievementFriends:'Przyjaciele', achievementFriendsDetail:'Dzięki za zaproszenie znajomego do gry 1 na 1!', achievementSecretName:'???', achievementSecretDetail:'Bocie, przegraj', achievementLoseZach:'Przegrana z Zachem', achievementLoseZachDetail:'Wow! Przegrałeś z Zachem!', unlockedLabel:'Odblokowano!', showMore:'POKAŻ WIĘCEJ', showLess:'POKAŻ MNIEJ', showMoves:'POKAŻ RUCHY', hideMoves:'UKRYJ RUCHY', clearAchievements:'WYCZYŚĆ OSIĄGNIĘCIA', areYouSure:'NA PEWNO?', yes:'TAK', no:'NIE', cancelClear:'Anuluj czyszczenie osiągnięć', resetCustomization:'PRZYWRÓĆ DOMYŚLNE', resetAreYouSure:'PRZYWRÓCIĆ DOMYŚLNE USTAWIENIA?', cancelReset:'Anuluj przywracanie ustawień', chessMove:'Ruch szachowy', victory:'Zwycięstwo', defeat:'Porażka', draw:'Remis', linkOpened:'Otwarto odnośnik',
-      mode:'TRYB: {0}', customMode:'TRYB: NIESTANDARDOWY (GŁĘBOKOŚĆ {0})', gameOver:'KONIEC GRY', whiteMove:'RUCH BIAŁYCH', blackMove:'RUCH CZARNYCH', yourMoveWhite:'TWÓJ RUCH — BIAŁE', checkWhite:'SZACH — RUCH BIAŁYCH', checkBlack:'SZACH — RUCH CZARNYCH', checkThinking:'SZACH — CZARNE MYŚLĄ...', thinking:'CZARNE MYŚLĄ...', checkYourMove:'SZACH — TWÓJ RUCH'
+      achievementLanguage:'Poliglota', achievementLanguageDetail:'Zmień język interfejsu.', achievementWindows:'Łowca okien', achievementWindowsDetail:'Otwórz każde okno pulpitu.', achievementMove:'Pierwszy ruch', achievementMoveDetail:'Wykonaj pierwszy ruch szachowy.', achievementWin:'Mat', achievementWinDetail:'Wygraj partię szachów.', achievementCustomize:'Dostosuj', achievementCustomizeDetail:'Zmień tło i motyw!', achievementCustom:'Niestandardowy?!', achievementCustomDetail:'Wow! Grasz niestandardowym botem!', achievementFriends:'Przyjaciele', achievementFriendsDetail:'Dzięki za zaproszenie znajomego do gry 1 na 1!', achievementForeverFriend:'Wieczny przyjaciel', achievementForeverFriendDetail:'Może znaleźliście swojego wiecznego przyjaciela?', achievementNote:'Notatnik', achievementNoteDetail:'Zapisz coś w lokalnym notatniku.', achievementFocus:'Strażnik czasu', achievementFocusDetail:'Ukończ sesję skupienia.', achievementShortcut:'Szybkie przełączanie', achievementShortcutDetail:'Użyj skrótu klawiaturowego, aby otworzyć okno.', achievementCalendar:'Strażnik kalendarza', achievementCalendarDetail:'Otwórz kalendarz i zaplanuj dzień.', achievementSecretName:'???', achievementSecretDetail:'Bocie, przegraj', achievementLoseZach:'Przegrana z Zachem', achievementLoseZachDetail:'Wow! Przegrałeś z Zachem!', unlockedLabel:'Odblokowano!', showMore:'POKAŻ WIĘCEJ', showLess:'POKAŻ MNIEJ', showMoves:'POKAŻ RUCHY', hideMoves:'UKRYJ RUCHY', clearAchievements:'WYCZYŚĆ OSIĄGNIĘCIA', areYouSure:'NA PEWNO?', yes:'TAK', no:'NIE', cancelClear:'Anuluj czyszczenie osiągnięć', acceptDraw:'AKCEPTUJ REMIS', refuseDraw:'ODRZUĆ REMIS', cancelDraw:'Anuluj akceptowanie remisu', resetCustomization:'PRZYWRÓĆ DOMYŚLNE', resetAreYouSure:'PRZYWRÓCIĆ DOMYŚLNE USTAWIENIA?', cancelReset:'Anuluj przywracanie ustawień', chessMove:'Ruch szachowy', victory:'Zwycięstwo', defeat:'Porażka', draw:'Remis', linkOpened:'Otwarto odnośnik',
+      mode:'TRYB: {0}', customMode:'TRYB: NIESTANDARDOWY (GŁĘBOKOŚĆ {0})', gameOver:'KONIEC GRY', whiteMove:'RUCH BIAŁYCH', blackMove:'RUCH CZARNYCH', yourMoveWhite:'TWÓJ RUCH — BIAŁE', checkWhite:'SZACH — RUCH BIAŁYCH', checkBlack:'SZACH — RUCH CZARNYCH', checkThinking:'SZACH — CZARNE MYŚLĄ...', thinking:'CZARNE MYŚLĄ...', checkYourMove:'SZACH — TWÓJ RUCH', drawOffered:'ZAPROPONOWANO REMIS'
     }
   };
   var language = 'en';
@@ -680,6 +786,11 @@
     { id:'customize', name:'achievementCustomize', detail:'achievementCustomizeDetail' },
     { id:'custom', name:'achievementCustom', detail:'achievementCustomDetail' },
     { id:'friends', name:'achievementFriends', detail:'achievementFriendsDetail' },
+    { id:'foreverFriend', name:'achievementForeverFriend', detail:'achievementForeverFriendDetail' },
+    { id:'note', name:'achievementNote', detail:'achievementNoteDetail' },
+    { id:'focus', name:'achievementFocus', detail:'achievementFocusDetail' },
+    { id:'shortcut', name:'achievementShortcut', detail:'achievementShortcutDetail' },
+    { id:'calendar', name:'achievementCalendar', detail:'achievementCalendarDetail' },
     { id:'loseZach', name:'achievementLoseZach', detail:'achievementLoseZachDetail', secret:true }
   ];
   var unlocked = {};
@@ -727,6 +838,7 @@
   };
   window.siteMarkWindowOpened = function(id){
     openedWindows[id] = true;
+    if(id==='calendar') window.siteUnlockAchievement('calendar');
     if(['identity','chess','log','customization','achievements'].every(function(windowId){ return openedWindows[windowId]; })) window.siteUnlockAchievement('windows');
   };
   window.addEventListener('languagechange', function(){
@@ -805,7 +917,7 @@
   var bootEl = document.getElementById('boot');
   var linesEl = document.getElementById('bootLines');
   var lines = [
-    'Gelmix siteOS',
+    'Gelmix siteOS 3.2',
     'loading terminal.log ....... OK',
     'checking display driver ....... OK',
     'loading identity.exe ....... OK',
@@ -883,7 +995,7 @@
   var lines = [
     '> Loading home/logs/latest.log',
     '> Succesfully loaded! Displaying...',
-    '> Gelmix siteOS',
+    '> Gelmix siteOS 3.2',
     '> loading terminal.log ....... OK',
     '> checking display driver ....... OK',
     '> loading identity.exe ....... OK',
@@ -926,9 +1038,32 @@
 })();
 
 (function(){
+  var taskbar = document.querySelector('.taskbar');
+  var launchers = taskbar.querySelector('.taskbar__windows');
+  var iconMode = false;
+  function update(){
+    if(iconMode) taskbar.classList.remove('taskbar--icons');
+    var needsIcons = launchers.scrollWidth > launchers.clientWidth + 1;
+    iconMode = needsIcons;
+    taskbar.classList.toggle('taskbar--icons', iconMode);
+  }
+  update();
+  window.addEventListener('resize', update);
+})();
+
+(function(){
   var windows = Array.prototype.slice.call(document.querySelectorAll('.window'));
   var zTop = 10;
   var ANIM_MS = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 200;
+  var layoutKey = 'gelmix-siteos-window-layout';
+  var savedLayout = {};
+  try{ savedLayout = JSON.parse(localStorage.getItem(layoutKey) || '{}'); }catch(_){ }
+
+  function saveLayout(win){
+    if(!window.matchMedia('(min-width: 921px)').matches || win.classList.contains('window--maximized')) return;
+    savedLayout[win.dataset.window] = { left:win.style.left, top:win.style.top, width:win.style.width, height:win.style.height };
+    try{ localStorage.setItem(layoutKey, JSON.stringify(savedLayout)); }catch(_){ }
+  }
 
   function isDesktopMode(){
     return window.matchMedia('(min-width: 921px)').matches;
@@ -1053,6 +1188,13 @@
   });
 
   windows.forEach(function(win){
+    var remembered = savedLayout[win.dataset.window];
+    if(remembered){
+      if(remembered.left) win.style.left = remembered.left;
+      if(remembered.top) win.style.top = remembered.top;
+      if(remembered.width) win.style.width = remembered.width;
+      if(remembered.height) win.style.height = remembered.height;
+    }
     var bar = win.querySelector('.window__bar');
     var closeBtn = win.querySelector('[data-action="close"]');
     var minBtn = win.querySelector('[data-action="minimize"]');
@@ -1089,6 +1231,7 @@
       if(!dragging) return;
       dragging = false;
       win.classList.remove('is-dragging');
+      saveLayout(win);
       try{ bar.releasePointerCapture(e.pointerId); }catch(_){}
     }
     bar.addEventListener('pointerup', endDrag);
@@ -1121,6 +1264,7 @@
         if(!resizing) return;
         resizing = false;
         win.classList.remove('is-resizing');
+        saveLayout(win);
         try{ resizeHandle.releasePointerCapture(e.pointerId); }catch(_){}
       }
       resizeHandle.addEventListener('pointerup', endResize);
@@ -1169,6 +1313,26 @@
         block:'center'
       });
     });
+  });
+
+  var shortcutArmed = false;
+  var shortcutTimer;
+  window.addEventListener('keydown', function(e){
+    var target = e.target;
+    var isEditable = target && (target.matches('input, textarea, select') || target.isContentEditable);
+    if(isEditable) return;
+    if(e.key.toLowerCase()==='a'){
+      shortcutArmed = true;
+      clearTimeout(shortcutTimer);
+      shortcutTimer = setTimeout(function(){ shortcutArmed = false; }, 1200);
+      return;
+    }
+    if(!shortcutArmed || e.key < '1' || e.key > '7') return;
+    shortcutArmed = false;
+    clearTimeout(shortcutTimer);
+    var launchers = document.querySelectorAll('.taskbar__windows .taskbar__btn[data-window]');
+    var launcher = launchers[Number(e.key) - 1];
+    if(launcher){ e.preventDefault(); launcher.click(); window.siteUnlockAchievement('shortcut'); }
   });
 })();
 
@@ -1591,6 +1755,14 @@
   var undoBtn = document.getElementById('chessUndoBtn');
   var movesBtn = document.getElementById('chessMovesBtn');
   var moveHistoryEl = document.getElementById('moveHistory');
+  var drawControls = document.getElementById('drawControls');
+  var drawBtn = document.getElementById('drawBtn');
+  var acceptDrawBtn = document.getElementById('acceptDrawBtn');
+  var refuseDrawBtn = document.getElementById('refuseDrawBtn');
+  var acceptDrawMenu = document.getElementById('acceptDrawMenu');
+  var acceptDrawCloseBtn = document.getElementById('acceptDrawClose');
+  var acceptDrawNoBtn = document.getElementById('acceptDrawNo');
+  var acceptDrawYesBtn = document.getElementById('acceptDrawYes');
   var botMenu = document.getElementById('botMenu');
   var botMenuCloseBtn = document.getElementById('botMenuClose');
   var botOptions = Array.prototype.slice.call(document.querySelectorAll('#botMenu .bot-menu__option'));
@@ -1603,7 +1775,26 @@
   var promotionMenuCloseBtn = document.getElementById('promotionMenuClose');
   var promotionOptions = Array.prototype.slice.call(document.querySelectorAll('[data-promotion]'));
 
-  var chessState, stateHistory, moveHistory, selected, legalTargets, gameOver, aiThinking, difficulty, animatedMove, lastMove, pendingPromotion;
+  var chessState, stateHistory, moveHistory, selected, legalTargets, gameOver, aiThinking, difficulty, animatedMove, lastMove, pendingPromotion, drawOffered;
+  var resultKey = 'gelmix-siteos-1v1-results';
+  var oneVOneResults = { whiteWins:0, blackWins:0, draws:0 };
+  try{ oneVOneResults = Object.assign(oneVOneResults, JSON.parse(localStorage.getItem(resultKey) || '{}')); }catch(_){ }
+
+  function saveOneVOneResults(){
+    try{ localStorage.setItem(resultKey, JSON.stringify(oneVOneResults)); }catch(_){ }
+  }
+
+  function checkForeverFriend(){
+    if(oneVOneResults.whiteWins >= 3 && oneVOneResults.blackWins >= 3 && oneVOneResults.draws >= 1) window.siteUnlockAchievement('foreverFriend');
+  }
+
+  function updateDrawControls(){
+    var visible = difficulty==='1v1' && !gameOver;
+    drawControls.hidden = !visible;
+    drawBtn.hidden = drawOffered;
+    acceptDrawBtn.hidden = !drawOffered;
+    refuseDrawBtn.hidden = !drawOffered;
+  }
 
   function syncBotMenu(){
     botOptions.forEach(function(option){
@@ -1615,12 +1806,97 @@
     botLabel.textContent = difficulty==='custom' ? window.siteTranslate('customMode').replace('{0}', customSearchDepth) : window.siteTranslate('mode').replace('{0}', difficulty.toUpperCase());
   }
 
+  function getMoveInPGN(move, boardBefore, stateAfter){
+    var piece = boardBefore[move.from.r][move.from.c];
+    var color = pieceColor(piece);
+    var type = pieceType(piece);
+    var dest = squareName(move.to.r, move.to.c);
+    var isCap = !!boardBefore[move.to.r][move.to.c] || move.enPassant;
+    
+    if(move.castle==='K') return 'O-O';
+    if(move.castle==='Q') return 'O-O-O';
+    
+    if(type==='P'){
+      var notation = isCap ? squareName(move.from.r, move.from.c)[0] + 'x' + dest : dest;
+      if(move.promotion) notation += '=' + move.promotion;
+      if(stateAfter && isInCheck(stateAfter.board, stateAfter.turn)) notation += '+';
+      return notation;
+    }
+    
+    var notation = type;
+    
+    // Check for disambiguation
+    var otherMoves = generatePseudoMoves({board: boardBefore, enPassant: null}, 0, 0);
+    var sameTypeMoves = [];
+    for(var r=0;r<8;r++){
+      for(var c=0;c<8;c++){
+        var p = boardBefore[r][c];
+        if(p && pieceColor(p)===color && pieceType(p)===type && !(r===move.from.r && c===move.from.c)){
+          var testMoves = generatePseudoMoves({board: boardBefore, castling:{w:{K:true,Q:true},b:{K:true,Q:true}}, enPassant:null}, r, c);
+          testMoves.forEach(function(m){
+            if(m.to.r===move.to.r && m.to.c===move.to.c) sameTypeMoves.push(m);
+          });
+        }
+      }
+    }
+    
+    if(sameTypeMoves.length > 0){
+      var sameFile = sameTypeMoves.some(function(m){ return m.from.c === move.from.c; });
+      var sameRank = sameTypeMoves.some(function(m){ return m.from.r === move.from.r; });
+      if(!sameFile){
+        notation += 'abcdefgh'[move.from.c];
+      } else if(!sameRank){
+        notation += (8 - move.from.r);
+      } else {
+        notation += squareName(move.from.r, move.from.c);
+      }
+    }
+    
+    if(isCap) notation += 'x';
+    notation += dest;
+    if(move.promotion) notation += '=' + move.promotion;
+    if(stateAfter && isInCheck(stateAfter.board, stateAfter.turn)) notation += '+';
+    
+    return notation;
+  }
+
+  function generatePGN(){
+    var now = new Date();
+    var dateStr = now.getFullYear() + '.' + String(now.getMonth()+1).padStart(2,'0') + '.' + String(now.getDate()).padStart(2,'0');
+    var result = gameOver ? '*' : '*';
+    var blackName = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+    
+    var pgnText = '[Event "?"]\n';
+    pgnText += '[Site "?"]\n';
+    pgnText += '[Date "' + dateStr + '"]\n';
+    pgnText += '[White "white"]\n';
+    pgnText += '[Black "' + blackName + '"]\n';
+    pgnText += '[Result "' + result + '"]\n\n';
+    
+    var movePairs = [];
+    for(var i=0; i<moveHistory.length; i++){
+      var move = moveHistory[i];
+      var boardBefore = i < stateHistory.length ? stateHistory[i].board : chessState.board;
+      var stateAfter = i+1 < stateHistory.length ? stateHistory[i+1] : chessState;
+      var pgnMove = getMoveInPGN(move, boardBefore, stateAfter);
+      
+      if(i%2===0){
+        var moveNum = Math.floor(i/2) + 1;
+        movePairs.push(moveNum + '. ' + pgnMove);
+      } else {
+        movePairs[movePairs.length-1] += ' ' + pgnMove;
+      }
+    }
+    
+    pgnText += movePairs.join(' ');
+    if(!gameOver) pgnText += ' *';
+    
+    return pgnText;
+  }
+
   function renderMoveHistory(){
-    moveHistoryEl.innerHTML = moveHistory.map(function(move, index){
-      var moveNumber = Math.floor(index/2) + 1;
-      var column = index%2===0 ? 1 : 2;
-      return '<span class="move-history__number">'+(column===1 ? moveNumber+'.' : '')+'</span><span>'+ (column===1 ? squareName(move.from.r, move.from.c)+'-'+squareName(move.to.r, move.to.c) : '') +'</span><span>'+ (column===2 ? squareName(move.from.r, move.from.c)+'-'+squareName(move.to.r, move.to.c) : '') +'</span>';
-    }).join('');
+    var pgnText = generatePGN();
+    moveHistoryEl.textContent = pgnText;
   }
 
   function closeBotMenu(){
@@ -1662,10 +1938,14 @@
         openCustomDepthMenu();
         return;
       }
+      newGame();
       difficulty = option.dataset.bot;
       if(difficulty==='1v1') window.siteUnlockAchievement('friends');
+      drawOffered = false;
       updateBotLabel();
       if(difficulty==='1v1') updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
+      updateDrawControls();
+      renderMoveHistory();
       syncBotMenu();
       closeBotMenu();
     });
@@ -1680,9 +1960,11 @@
     var enteredDepth = Number(customDepthInput.value);
     if(!Number.isInteger(enteredDepth)) return;
     customSearchDepth = Math.max(1, Math.min(8, enteredDepth));
+    newGame();
     difficulty = 'custom';
     window.siteUnlockAchievement('custom');
     updateBotLabel();
+    renderMoveHistory();
     syncBotMenu();
     closeCustomDepthMenu();
   });
@@ -1690,6 +1972,7 @@
     if(event.key!=='Escape') return;
     if(!botMenu.hidden) closeBotMenu();
     else if(!customDepthMenu.hidden) closeCustomDepthMenu();
+    else if(!acceptDrawMenu.hidden) closeAcceptDrawMenu();
     else if(!promotionMenu.hidden) closePromotionMenu();
   });
 
@@ -1700,6 +1983,33 @@
     legalTargets = [];
     renderBoard();
   }
+
+  function closeAcceptDrawMenu(){ acceptDrawMenu.hidden = true; }
+
+  drawBtn.addEventListener('click', function(){
+    if(difficulty!=='1v1' || gameOver) return;
+    drawOffered = true;
+    updateDrawControls();
+    msgEl.textContent = window.siteTranslate('drawOffered');
+  });
+  acceptDrawBtn.addEventListener('click', function(){
+    if(!drawOffered || gameOver) return;
+    acceptDrawMenu.hidden = false;
+    acceptDrawNoBtn.focus();
+  });
+  refuseDrawBtn.addEventListener('click', function(){
+    drawOffered = false;
+    updateDrawControls();
+    updateTwoPlayerMessage(isInCheck(chessState.board, chessState.turn));
+  });
+  acceptDrawCloseBtn.addEventListener('click', closeAcceptDrawMenu);
+  acceptDrawNoBtn.addEventListener('click', closeAcceptDrawMenu);
+  acceptDrawYesBtn.addEventListener('click', function(){
+    closeAcceptDrawMenu();
+    drawOffered = false;
+    finishGame('DRAW — AGREED');
+  });
+  acceptDrawMenu.addEventListener('click', function(event){ if(event.target===acceptDrawMenu) closeAcceptDrawMenu(); });
 
   function openPromotionMenu(move){
     pendingPromotion = move;
@@ -1791,11 +2101,20 @@
 
   function finishGame(result){
     gameOver = true;
+    drawOffered = false;
+    if(difficulty==='1v1'){
+      if(result.indexOf('WHITE WINS')===0) oneVOneResults.whiteWins++;
+      else if(result.indexOf('BLACK WINS')===0) oneVOneResults.blackWins++;
+      else if(result.indexOf('DRAW')===0) oneVOneResults.draws++;
+      saveOneVOneResults();
+      checkForeverFriend();
+    }
     if(result.indexOf('WHITE WINS')===0) window.siteUnlockAchievement('win');
     if(difficulty==='zach' && result.indexOf('BLACK WINS')===0) window.siteUnlockAchievement('loseZach');
     window.siteLogEvent(result.indexOf('WHITE WINS')===0 ? 'Victory: '+result : (result.indexOf('BLACK WINS')===0 ? 'Defeat: '+result : 'Draw: '+result));
     msgEl.textContent = result;
     selected = null; legalTargets = [];
+    updateDrawControls();
     renderBoard();
     updateHud();
   }
@@ -1871,12 +2190,14 @@
     stateHistory = [];
     selected = null; legalTargets = [];
     gameOver = false; aiThinking = false;
+    drawOffered = false;
     lastMove = null;
     moveHistory = [];
     renderMoveHistory();
     msgEl.textContent = window.siteTranslate('yourMoveWhite');
     renderBoard();
     updateHud();
+    updateDrawControls();
   }
 
   difficulty = 'hard';
@@ -1913,8 +2234,131 @@
   });
 
   legalTargets = [];
+  
+  // Discord Status
+  var discordStatusEl = document.getElementById('discordStatus');
+  var discordIndicator = discordStatusEl.querySelector('.discord-status__indicator');
+  var discordText = discordStatusEl.querySelector('.discord-status__text');
+  var DISCORD_USER_ID = '1332668956938600488';
+  
+  function updateDiscordStatus(){
+    fetch('https://api.lanyard.rest/v1/users/' + DISCORD_USER_ID, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function(r){ 
+        console.log('Lanyard HTTP status:', r.status);
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json(); 
+      })
+      .then(function(data){
+        console.log('Lanyard full response:', data);
+        if(data && data.data && data.data.discord_status){
+          var status = data.data.discord_status;
+          var statusText = status.charAt(0).toUpperCase() + status.slice(1);
+          console.log('Setting status to:', statusText);
+          discordText.textContent = 'DISCORD: ' + statusText;
+          
+          discordIndicator.classList.remove('online', 'idle', 'dnd', 'offline');
+          discordIndicator.classList.add(status);
+        } else {
+          throw new Error('Missing discord_status in response');
+        }
+      })
+      .catch(function(err){ 
+        console.error('Discord Lanyard error:', err);
+        console.error('Note: Lanyard requires you to enable it at https://lanyard.rest/');
+        discordText.textContent = 'DISCORD: OFFLINE (Enable Lanyard)';
+        discordIndicator.classList.remove('online', 'idle', 'dnd', 'offline');
+        discordIndicator.classList.add('offline');
+      });
+  }
+  
+  updateDiscordStatus();
+  setInterval(updateDiscordStatus, 30000);
+  
   newGame();
 })();
+
+(function(){
+  var notes = document.getElementById('notesArea');
+  var notesCount = document.getElementById('notesCount');
+  var clearNotes = document.getElementById('clearNotesBtn');
+  try{ notes.value = localStorage.getItem('gelmix-siteos-notes') || ''; }catch(_){ }
+  function updateNotes(){
+    notesCount.textContent = notes.value.length + ' chars';
+    try{ localStorage.setItem('gelmix-siteos-notes', notes.value); }catch(_){ }
+  }
+  notes.addEventListener('input', function(){ updateNotes(); if(notes.value.trim()) window.siteUnlockAchievement('note'); });
+  clearNotes.addEventListener('click', function(){ notes.value = ''; updateNotes(); notes.focus(); });
+  updateNotes();
+})();
+
+(function(){
+  var display = document.getElementById('timerDisplay');
+  var status = document.getElementById('timerStatus');
+  var startButton = document.getElementById('timerStartBtn');
+  var resetButton = document.getElementById('timerResetBtn');
+  var seconds = 1500, initialSeconds = 1500, timer = null;
+  function render(){
+    var minutes = Math.floor(seconds / 60);
+    var remainder = String(seconds % 60).padStart(2, '0');
+    display.textContent = String(minutes).padStart(2, '0') + ':' + remainder;
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer = null; } startButton.textContent = 'START'; }
+  function tick(){
+    if(seconds <= 0){ stop(); display.classList.add('is-done'); status.textContent = 'SESSION COMPLETE · TAKE A BREAK'; window.siteUnlockAchievement('focus'); return; }
+    seconds--; render();
+  }
+  document.querySelectorAll('[data-minutes]').forEach(function(button){
+    button.addEventListener('click', function(){
+      stop(); initialSeconds = Number(button.dataset.minutes) * 60; seconds = initialSeconds; display.classList.remove('is-done'); status.textContent = 'READY · ' + button.dataset.minutes + ' MIN SESSION'; render();
+    });
+  });
+  startButton.addEventListener('click', function(){
+    if(timer){ stop(); status.textContent = 'PAUSED · ' + Math.ceil(seconds / 60) + ' MIN LEFT'; return; }
+    if(seconds <= 0) seconds = initialSeconds;
+    display.classList.remove('is-done'); timer = setInterval(tick, 1000); startButton.textContent = 'PAUSE'; status.textContent = 'FOCUS ACTIVE · STAY WITH IT';
+  });
+  resetButton.addEventListener('click', function(){ stop(); seconds = initialSeconds; display.classList.remove('is-done'); status.textContent = 'READY · CHOOSE A SESSION'; render(); });
+  render();
+})();
+
+(function(){
+  var monthLabel = document.getElementById('calendarMonth');
+  var grid = document.getElementById('calendarGrid');
+  var note = document.getElementById('calendarNote');
+  var selectedLabel = document.getElementById('calendarSelected');
+  var view = new Date();
+  var selected = new Date();
+  var noteKey = 'gelmix-siteos-calendar-notes';
+  var notes = {};
+  try{ notes = JSON.parse(localStorage.getItem(noteKey) || '{}'); }catch(_){ }
+  function dateKey(date){ return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0'); }
+  function render(){
+    var year = view.getFullYear(), month = view.getMonth();
+    monthLabel.textContent = view.toLocaleDateString(undefined, {month:'long', year:'numeric'}).toUpperCase();
+    var firstDay = new Date(year, month, 1).getDay();
+    var days = new Date(year, month + 1, 0).getDate();
+    var weekdays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    var html = weekdays.map(function(day){ return '<span class="calendar-weekday">'+day+'</span>'; }).join('');
+    for(var i=0;i<firstDay;i++) html += '<span class="calendar-day is-empty"></span>';
+    for(var day=1;day<=days;day++){
+      var current = new Date(year, month, day), key = dateKey(current);
+      var classes = 'calendar-day' + (key===dateKey(new Date()) ? ' is-today' : '') + (key===dateKey(selected) ? ' is-selected' : '');
+      html += '<button class="'+classes+'" type="button" data-date="'+key+'">'+day+(notes[key] ? ' ·' : '')+'</button>';
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll('[data-date]').forEach(function(button){ button.addEventListener('click', function(){ selected = new Date(button.dataset.date+'T12:00:00'); syncNote(); render(); }); });
+  }
+  function syncNote(){ selectedLabel.textContent = selected.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}).toUpperCase(); note.value = notes[dateKey(selected)] || ''; }
+  document.getElementById('calendarPrev').addEventListener('click', function(){ view.setMonth(view.getMonth()-1); render(); });
+  document.getElementById('calendarNext').addEventListener('click', function(){ view.setMonth(view.getMonth()+1); render(); });
+  note.addEventListener('input', function(){ var key = dateKey(selected); if(note.value.trim()) notes[key] = note.value; else delete notes[key]; try{ localStorage.setItem(noteKey, JSON.stringify(notes)); }catch(_){ } render(); });
+  syncNote();
+  render();
+})();
+
 </script>
 </body>
 </html>
